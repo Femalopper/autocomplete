@@ -108,7 +108,6 @@ input:focus {
   top: 100%;
   border: 1px solid #97b46c;
   width: 100%;
-  display: none;
   z-index: 9999;
   max-height: 400px;
   overflow-y: auto;

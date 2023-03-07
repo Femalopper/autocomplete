@@ -1,42 +1,85 @@
 import React, { useState } from 'react';
 import './Form.css';
+import words from '../data/words.json';
+import _ from 'lodash';
+import fields from '../data/fields.json';
 
 const Form = () => {
   const fieldRef = React.createRef();
-  const [fieldValues, setFieldValues] = useState({ inputValues: {} });
+  const [inputs, setInputs] = useState(fields);
 
   const changeHandler = (event) => {
     event.preventDefault();
-    setFieldValues({
-      inputValues: { ...fieldValues.inputValues, [event.target.name]: event.target.value },
+
+    const { target } = event;
+    const { value } = target;
+
+    const inputLetters = value.toLowerCase().split('');
+    //filter the list of hints according to the pressed key
+
+    const filterHintsList = (letter, arr) =>
+      arr.filter((word) => {
+        word = word.toLowerCase();
+        if (
+          word[inputLetters.indexOf(letter)] === letter &&
+          word[inputLetters.lastIndexOf(letter)] === letter
+        ) {
+          return word;
+        }
+      });
+
+    //the corresponding list of hints
+    const filteredHintsList = inputLetters.reduce((acc, letter) => {
+      acc = filterHintsList(letter, acc);
+      return acc;
+    }, words);
+
+    setInputs({
+      ...inputs,
+      [target.name]: { ...inputs[target.name], autocompleteOptions: filteredHintsList, value },
     });
   };
 
+  const selectItem = () => (option, id) => {
+    setInputs({ ...inputs, [id]: { ...inputs[id], value: option, status: 'filled' } });
+  };
+
+  const showOptions = (options, id) => {
+    return options.map((option) => (
+      <div key={_.uniqueId()} className="autocomplete-item" onClick={selectItem(option, id)}>
+        {option}
+      </div>
+    ));
+  };
+
   const makeField = () => {
-    let numOfFields = 33;
-    let currentFieldNumber = 1;
-    const listOfFields = [];
-    while (numOfFields > 0) {
-      listOfFields.push(
-        <td key={currentFieldNumber}>
-          <div className="input__field">
-            <span className="number">{currentFieldNumber}</span>
+    const inputsList = Object.entries(inputs);
+    console.log(inputs);
+
+    return inputsList.map(([, { id, autocompleteOptions, status, value }]) => (
+      <td key={_.uniqueId()}>
+        <div className="input__field">
+          <span className="number">{id}</span>
+          <div className="autocomplete-wrap">
             <input
               type="text"
               id="autocomplete"
               autoComplete="off"
-              tabIndex={currentFieldNumber}
-              name={currentFieldNumber}
+              tabIndex={id}
+              name={id}
+              className="autocomplete-input"
               ref={fieldRef}
+              value={value}
               onChange={changeHandler}
+              autoFocus={id === '1' ? true : false}
             />
+            <div className="autocomplete-list">
+              {autocompleteOptions.length !== 0 ? showOptions(autocompleteOptions, id) : null}
+            </div>
           </div>
-        </td>
-      );
-      numOfFields -= 1;
-      currentFieldNumber += 1;
-    }
-    return listOfFields;
+        </div>
+      </td>
+    ));
   };
 
   return (
