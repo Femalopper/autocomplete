@@ -15,25 +15,14 @@ const Form = () => {
     const { target } = event;
     const { value } = target;
 
-    const inputLetters = value.toLowerCase().split('');
+    const inputLetters = value.toLowerCase();
     //filter the list of hints according to the pressed key
 
-    const filterHintsList = (letter, arr) =>
-      arr.filter((word) => {
-        word = word.toLowerCase();
-        if (
-          word[inputLetters.indexOf(letter)] === letter &&
-          word[inputLetters.lastIndexOf(letter)] === letter
-        ) {
-          return word;
-        }
-      });
-
-    //the corresponding list of hints
-    const filteredHintsList = inputLetters.reduce((acc, letter) => {
-      acc = filterHintsList(letter, acc);
-      return acc;
-    }, words);
+    const filteredHintsList = words.filter((word) => {
+      word = word.toLowerCase();
+      const slicedWord = word.slice(0, inputLetters.length);
+      return slicedWord === inputLetters;
+    });
 
     setInputs({
       ...inputs,
@@ -50,11 +39,7 @@ const Form = () => {
     return (
       <div className="autocomplete-list">
         {options.map((option) => (
-          <div
-            key={_.uniqueId()}
-            className={classNames('autocomplete-item', { filled: inputs[id].status === 'filled' })}
-            onClick={selectItem(option, id)}
-          >
+          <div key={_.uniqueId()} className="autocomplete-item" onClick={selectItem(option, id)}>
             {option}
           </div>
         ))}
@@ -66,7 +51,7 @@ const Form = () => {
     const inputsList = Object.entries(inputs);
     console.log(inputs);
 
-    return inputsList.map(([, { id, autocompleteOptions, value }]) => (
+    return inputsList.map(([, { id, autocompleteOptions, status, value }]) => (
       <td key={_.uniqueId()}>
         <div className="input__field">
           <span className="number">{id}</span>
@@ -77,7 +62,7 @@ const Form = () => {
               autoComplete="off"
               tabIndex={id}
               name={id}
-              className="autocomplete-input"
+              className={classNames('autocomplete-input', { filled: status === 'filled' })}
               ref={fieldRef}
               value={value}
               onChange={changeHandler}
