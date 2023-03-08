@@ -3,6 +3,7 @@ import './Form.css';
 import words from '../data/words.json';
 import _ from 'lodash';
 import fields from '../data/fields.json';
+import classNames from 'classnames';
 
 const Form = () => {
   const fieldRef = React.createRef();
@@ -40,23 +41,32 @@ const Form = () => {
     });
   };
 
-  const selectItem = () => (option, id) => {
+  const selectItem = (option, id) => (event) => {
+    event.preventDefault();
     setInputs({ ...inputs, [id]: { ...inputs[id], value: option, status: 'filled' } });
   };
 
   const showOptions = (options, id) => {
-    return options.map((option) => (
-      <div key={_.uniqueId()} className="autocomplete-item" onClick={selectItem(option, id)}>
-        {option}
+    return (
+      <div className="autocomplete-list">
+        {options.map((option) => (
+          <div
+            key={_.uniqueId()}
+            className={classNames('autocomplete-item', { filled: inputs[id].status === 'filled' })}
+            onClick={selectItem(option, id)}
+          >
+            {option}
+          </div>
+        ))}
       </div>
-    ));
+    );
   };
 
   const makeField = () => {
     const inputsList = Object.entries(inputs);
     console.log(inputs);
 
-    return inputsList.map(([, { id, autocompleteOptions, status, value }]) => (
+    return inputsList.map(([, { id, autocompleteOptions, value }]) => (
       <td key={_.uniqueId()}>
         <div className="input__field">
           <span className="number">{id}</span>
@@ -73,9 +83,7 @@ const Form = () => {
               onChange={changeHandler}
               autoFocus={id === '1' ? true : false}
             />
-            <div className="autocomplete-list">
-              {autocompleteOptions.length !== 0 ? showOptions(autocompleteOptions, id) : null}
-            </div>
+            {autocompleteOptions.length !== 0 ? showOptions(autocompleteOptions, id) : null}
           </div>
         </div>
       </td>

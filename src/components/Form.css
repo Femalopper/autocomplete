@@ -96,6 +96,7 @@ input:focus {
   position: relative;
   width: 120px;
   height: 34px;
+  display: block;
 }
 
 .autocomplete-input {
@@ -104,6 +105,7 @@ input:focus {
 
 .autocomplete-list {
   position: absolute;
+  border-radius: 0 0 3px 3px;
   background-color: white;
   top: 100%;
   border: 1px solid #97b46c;
@@ -111,6 +113,7 @@ input:focus {
   z-index: 9999;
   max-height: 400px;
   overflow-y: auto;
+  display: block;
 }
 
 .autocomplete-wrap.active .autocomplete-list {
