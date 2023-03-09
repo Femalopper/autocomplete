@@ -162,14 +162,15 @@ const Form = () => {
     const { target } = event;
     const { name } = target;
 
-    console.log(inputs);
-
     if (target.classList.contains('autocomplete-item')) {
       return;
     }
 
     const inputObjects = Object.values(inputs);
-    const currentFocusedItem = inputObjects.filter(({ status }) => status === 'focused');
+    const currentFocusedItem = inputObjects.filter(
+      ({ status }) => status === 'focused' || status === 'focus filled'
+    );
+
     if (currentFocusedItem.length === 0 && target.classList.contains('autocomplete-input')) {
       setInputs({
         ...inputs,
@@ -188,6 +189,21 @@ const Form = () => {
       });
       return;
     }
+    if (currentFocusedItem.length !== 0 && target.classList.contains('autocomplete-input')) {
+      setInputs({
+        ...inputs,
+        [name]: {
+          ...inputs[name],
+          status: inputs[name].status === 'unfocused' ? 'focused' : 'focus filled',
+        },
+        [currentFocusedItemId]: {
+          ...inputs[currentFocusedItemId],
+          status:
+            inputs[currentFocusedItemId].status === 'focused' ? 'unfocused' : 'unfocus filled',
+        },
+      });
+      return;
+    }
     if (currentFocusedItemId !== name && target.classList.contains('autocomplete-input')) {
       setInputs({
         ...inputs,
@@ -197,6 +213,7 @@ const Form = () => {
           status: 'unfocused',
         },
       });
+      return;
     }
   };
 
@@ -214,13 +231,16 @@ const Form = () => {
               autoComplete="off"
               tabIndex={id}
               name={id}
-              className={classNames('autocomplete-input', { filled: status === 'filled' })}
+              className={classNames('autocomplete-input', {
+                filled:
+                  status === 'filled' || status === 'unfocus filled' || status === 'focus filled',
+              })}
               ref={fieldRef}
               value={value}
               onChange={changeHandler}
-              autoFocus={status === 'focused'}
+              autoFocus={status === 'focused' || status === 'focus filled'}
             />
-            {status === 'focused' && formState !== 'firstLoad'
+            {(status === 'focused' || status === 'focus filled') && formState !== 'firstLoad'
               ? showOptions(autocompleteOptions, id)
               : null}
           </div>
