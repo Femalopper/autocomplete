@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './Form.css';
-import words from '../data/words.json';
 import _ from 'lodash';
 import fields from '../data/fields.json';
 import classNames from 'classnames';
+import options from '../data/words.json';
 
 const Form = () => {
-  const fieldRef = React.createRef();
+  const fieldRef = useRef(null);
   const [inputs, setInputs] = useState(fields);
 
   const changeHandler = (event) => {
@@ -15,19 +15,82 @@ const Form = () => {
     const { target } = event;
     const { value } = target;
 
+    const lowerLetterWords = options.map((option) => option.toLowerCase());
+    const sortedOptions = lowerLetterWords.sort();
     const inputLetters = value.toLowerCase();
     //filter the list of hints according to the pressed key
+    const filterOptions = () => {
+      let low = 0;
+      let high = sortedOptions.length - 1;
 
-    const filteredHintsList = words.filter((word) => {
-      word = word.toLowerCase();
-      const slicedWord = word.slice(0, inputLetters.length);
-      return slicedWord === inputLetters;
-    });
+      while (low <= high) {
+        const midWordIndex = Math.floor((low + high) / 2);
+        const midWordSubstring = sortedOptions[midWordIndex].slice(0, inputLetters.length);
+        if (midWordSubstring === inputLetters) {
+          return midWordIndex;
+        } else if (midWordSubstring < inputLetters) {
+          low = midWordIndex + 1;
+        } else if (midWordSubstring > inputLetters) {
+          high = midWordIndex - 1;
+        }
+      }
+    };
 
-    setInputs({
-      ...inputs,
-      [target.name]: { ...inputs[target.name], autocompleteOptions: filteredHintsList, value },
-    });
+    const midWord = filterOptions();
+
+    const filterLeftOptions = () => {
+      let low = 0;
+      let high = midWord;
+
+      while (low <= high) {
+        const midWordIndex = Math.floor((low + high) / 2);
+        const midWordSubstring = sortedOptions[midWordIndex].slice(0, inputLetters.length);
+        if (midWordSubstring === inputLetters) {
+          return midWordIndex;
+        } else if (midWordSubstring < inputLetters) {
+          low = midWordIndex + 1;
+        }
+      }
+    };
+
+    const filterRightOptions = () => {
+      let low = midWord;
+      let high = options.length - 1;
+
+      while (low <= high) {
+        const midWordIndex = Math.floor((low + high) / 2);
+        const midWordSubstring = sortedOptions[midWordIndex].slice(0, inputLetters.length);
+        if (midWordSubstring === inputLetters) {
+          return midWordIndex;
+        } else if (midWordSubstring > inputLetters) {
+          high = midWordIndex - 1;
+        }
+      }
+    };
+
+    const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
+
+    if (filteredHintsList.includes(inputLetters)) {
+      setInputs({
+        ...inputs,
+        [target.name]: {
+          ...inputs[target.name],
+          autocompleteOptions: filteredHintsList,
+          value,
+          status: 'filled',
+        },
+      });
+    } else {
+      setInputs({
+        ...inputs,
+        [target.name]: {
+          ...inputs[target.name],
+          autocompleteOptions: filteredHintsList,
+          value,
+          status: 'focused',
+        },
+      });
+    }
   };
 
   const selectItem = (option, id) => (event) => {
@@ -45,6 +108,23 @@ const Form = () => {
         ))}
       </div>
     );
+  };
+
+  const autofocus = (id) => (event) => {
+    event.preventDefault();
+    const inputObjects = Object.values(inputs);
+    const currentFocusedItem = inputObjects.filter(({ status }) => status === 'focused');
+    const currentFocusedItemId = currentFocusedItem[0].id;
+    if (currentFocusedItemId !== id) {
+      setInputs({
+        ...inputs,
+        [id]: { ...inputs[id], status: 'focused' },
+        [currentFocusedItemId]: {
+          ...inputs[currentFocusedItemId],
+          status: 'unfocused',
+        },
+      });
+    }
   };
 
   const makeField = () => {
@@ -66,9 +146,10 @@ const Form = () => {
               ref={fieldRef}
               value={value}
               onChange={changeHandler}
-              autoFocus={id === '1' ? true : false}
+              onClick={autofocus(id)}
+              autoFocus={status === 'focused'}
             />
-            {autocompleteOptions.length !== 0 ? showOptions(autocompleteOptions, id) : null}
+            {status === 'focused' ? showOptions(autocompleteOptions, id) : null}
           </div>
         </div>
       </td>
