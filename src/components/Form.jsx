@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './Form.css';
 import _ from 'lodash';
 import fields from '../data/fields.json';
@@ -8,6 +8,7 @@ import options from '../data/words.json';
 const Form = () => {
   const fieldRef = useRef(null);
   const [inputs, setInputs] = useState(fields);
+  const [formState, setFormState] = useState('firstLoad');
 
   const getNearestUnfocusedField = () => {
     const nearstUnfocusedField = Object.values(inputs).filter(
@@ -21,8 +22,23 @@ const Form = () => {
   const changeHandler = (event) => {
     event.preventDefault();
 
+    setFormState('updated');
+
     const { target } = event;
     const { value } = target;
+
+    if (value === '') {
+      setInputs({
+        ...inputs,
+        [target.name]: {
+          ...inputs[target.name],
+          autocompleteOptions: options,
+          value,
+          status: 'focused',
+        },
+      });
+      return;
+    }
 
     const sortedOptions = options.sort((a, b) => a.localeCompare(b));
     const inputLetters = value.toLowerCase();
@@ -100,8 +116,6 @@ const Form = () => {
           status: 'focused',
         },
       });
-      console.log(inputs);
-      return;
     } else {
       setInputs({
         ...inputs,
@@ -142,6 +156,8 @@ const Form = () => {
     event.preventDefault();
     const { target } = event;
     const { name } = target;
+
+    console.log(inputs);
 
     if (target.classList.contains('autocomplete-item')) {
       return;
@@ -199,7 +215,9 @@ const Form = () => {
               onChange={changeHandler}
               autoFocus={status === 'focused'}
             />
-            {status === 'focused' ? showOptions(autocompleteOptions, id) : null}
+            {status === 'focused' && formState !== 'firstLoad'
+              ? showOptions(autocompleteOptions, id)
+              : null}
           </div>
         </div>
       </td>
