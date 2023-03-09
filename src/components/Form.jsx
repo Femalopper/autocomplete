@@ -9,6 +9,7 @@ const Form = () => {
   const fieldRef = useRef(null);
   const [inputs, setInputs] = useState(fields);
   const [formState, setFormState] = useState('firstLoad');
+  const [focusOption, setFocusOption] = useState(0);
 
   const getNearestUnfocusedField = () => {
     const nearstUnfocusedField = Object.values(inputs).filter(
@@ -143,8 +144,12 @@ const Form = () => {
   const showOptions = (options, id) => {
     return (
       <div className="autocomplete-list">
-        {options.map((option) => (
-          <div key={_.uniqueId()} className="autocomplete-item" onClick={selectItem(option, id)}>
+        {options.map((option, index) => (
+          <div
+            key={_.uniqueId()}
+            className={classNames('autocomplete-item', { focused: index === focusOption })}
+            onClick={selectItem(option, id)}
+          >
             {option}
           </div>
         ))}
