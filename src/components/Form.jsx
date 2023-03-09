@@ -9,14 +9,22 @@ const Form = () => {
   const fieldRef = useRef(null);
   const [inputs, setInputs] = useState(fields);
 
+  const getNearestUnfocusedField = () => {
+    const nearstUnfocusedField = Object.values(inputs).filter(
+      ({ status }) => status === 'unfocused'
+    );
+    const [first] = nearstUnfocusedField;
+    const nearstUnfocusedFieldId = first.id;
+    return nearstUnfocusedFieldId;
+  };
+
   const changeHandler = (event) => {
     event.preventDefault();
 
     const { target } = event;
     const { value } = target;
 
-    const lowerLetterWords = options.map((option) => option.toLowerCase());
-    const sortedOptions = lowerLetterWords.sort();
+    const sortedOptions = options.sort((a, b) => a.localeCompare(b));
     const inputLetters = value.toLowerCase();
     //filter the list of hints according to the pressed key
     const filterOptions = () => {
@@ -25,7 +33,9 @@ const Form = () => {
 
       while (low <= high) {
         const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex].slice(0, inputLetters.length);
+        const midWordSubstring = sortedOptions[midWordIndex]
+          .slice(0, inputLetters.length)
+          .toLowerCase();
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
         } else if (midWordSubstring < inputLetters) {
@@ -44,7 +54,9 @@ const Form = () => {
 
       while (low <= high) {
         const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex].slice(0, inputLetters.length);
+        const midWordSubstring = sortedOptions[midWordIndex]
+          .slice(0, inputLetters.length)
+          .toLowerCase();
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
         } else if (midWordSubstring < inputLetters) {
@@ -59,7 +71,9 @@ const Form = () => {
 
       while (low <= high) {
         const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex].slice(0, inputLetters.length);
+        const midWordSubstring = sortedOptions[midWordIndex]
+          .slice(0, inputLetters.length)
+          .toLowerCase();
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
         } else if (midWordSubstring > inputLetters) {
@@ -71,6 +85,8 @@ const Form = () => {
     const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
 
     if (filteredHintsList.includes(inputLetters)) {
+      const nearstUnfocusedField = getNearestUnfocusedField();
+
       setInputs({
         ...inputs,
         [target.name]: {
@@ -79,7 +95,13 @@ const Form = () => {
           value,
           status: 'filled',
         },
+        [nearstUnfocusedField]: {
+          ...inputs[nearstUnfocusedField],
+          status: 'focused',
+        },
       });
+      console.log(inputs);
+      return;
     } else {
       setInputs({
         ...inputs,
@@ -94,8 +116,14 @@ const Form = () => {
   };
 
   const selectItem = (option, id) => (event) => {
+    const nearstUnfocusedField = getNearestUnfocusedField();
+
     event.preventDefault();
-    setInputs({ ...inputs, [id]: { ...inputs[id], value: option, status: 'filled' } });
+    setInputs({
+      ...inputs,
+      [id]: { ...inputs[id], value: option, status: 'filled' },
+      [nearstUnfocusedField]: { ...inputs[nearstUnfocusedField], status: 'focused' },
+    });
   };
 
   const showOptions = (options, id) => {
@@ -110,15 +138,39 @@ const Form = () => {
     );
   };
 
-  const autofocus = (id) => (event) => {
+  const autofocus = (event) => {
     event.preventDefault();
+    const { target } = event;
+    const { name } = target;
+
+    if (target.classList.contains('autocomplete-item')) {
+      return;
+    }
+
     const inputObjects = Object.values(inputs);
     const currentFocusedItem = inputObjects.filter(({ status }) => status === 'focused');
-    const currentFocusedItemId = currentFocusedItem[0].id;
-    if (currentFocusedItemId !== id) {
+    if (currentFocusedItem.length === 0 && target.classList.contains('autocomplete-input')) {
       setInputs({
         ...inputs,
-        [id]: { ...inputs[id], status: 'focused' },
+        [name]: { ...inputs[name], status: 'focused' },
+      });
+      return;
+    }
+    if (currentFocusedItem.length === 0) {
+      return;
+    }
+    const currentFocusedItemId = currentFocusedItem[0].id;
+    if (!target.classList.contains('autocomplete-input')) {
+      setInputs({
+        ...inputs,
+        [currentFocusedItemId]: { ...inputs[currentFocusedItemId], status: 'unfocused' },
+      });
+      return;
+    }
+    if (currentFocusedItemId !== name && target.classList.contains('autocomplete-input')) {
+      setInputs({
+        ...inputs,
+        [name]: { ...inputs[name], status: 'focused' },
         [currentFocusedItemId]: {
           ...inputs[currentFocusedItemId],
           status: 'unfocused',
@@ -129,7 +181,6 @@ const Form = () => {
 
   const makeField = () => {
     const inputsList = Object.entries(inputs);
-    console.log(inputs);
 
     return inputsList.map(([, { id, autocompleteOptions, status, value }]) => (
       <td key={_.uniqueId()}>
@@ -146,7 +197,6 @@ const Form = () => {
               ref={fieldRef}
               value={value}
               onChange={changeHandler}
-              onClick={autofocus(id)}
               autoFocus={status === 'focused'}
             />
             {status === 'focused' ? showOptions(autocompleteOptions, id) : null}
@@ -157,7 +207,7 @@ const Form = () => {
   };
 
   return (
-    <div className="wrapper">
+    <div className="wrapper" onClick={autofocus}>
       <main id="page1" className="main">
         <h4>Enter your seed phrase</h4>
         <form className="input__wrap">
