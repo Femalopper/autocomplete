@@ -225,17 +225,16 @@ const Form = () => {
   const keyUpHandler = (event) => {
     const keyCode = event.keyCode;
 
-    if (keyCode === 40) {
-      // arrow down
+    if (keyCode === 40 || keyCode === 9) {
+      // arrow down and tab
       event.preventDefault();
       optionRefs.current[focusOption - 1].current.classList.remove('focused');
-      focusOption = focusOption === optionRefs.current.length ? 0 : focusOption;
-      optionRefs.current[focusOption].current.classList.add('focused');
-      optionRefs.current[focusOption].current.scrollIntoView({
+      focusOption = focusOption === optionRefs.current.length ? 1 : focusOption + 1;
+      optionRefs.current[focusOption - 1].current.classList.add('focused');
+      optionRefs.current[focusOption - 1].current.scrollIntoView({
         block: 'center',
         behavior: 'smooth',
       });
-      focusOption += 1;
     } else if (keyCode === 38) {
       // arrow up
       event.preventDefault();
