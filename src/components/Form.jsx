@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, createRef } from 'react';
 import './Form.css';
 import _ from 'lodash';
 import fields from '../data/fields.json';
@@ -6,10 +6,11 @@ import classNames from 'classnames';
 import options from '../data/words.json';
 
 const Form = () => {
-  const fieldRef = useRef(null);
+  const fieldRefs = useRef([]);
+  const optionRefs = useRef([]);
   const [inputs, setInputs] = useState(fields);
   const [formState, setFormState] = useState('firstLoad');
-  const [focusOption, setFocusOption] = useState(0);
+  let focusOption = 1;
 
   const getNearestUnfocusedField = () => {
     const nearstUnfocusedField = Object.values(inputs).filter(
@@ -142,13 +143,16 @@ const Form = () => {
   };
 
   const showOptions = (options, id) => {
+    optionRefs.current = options.map((_, i) => optionRefs.current[i] ?? createRef());
+
     return (
       <div className="autocomplete-list">
         {options.map((option, index) => (
           <div
             key={_.uniqueId()}
-            className={classNames('autocomplete-item', { focused: index === focusOption })}
+            className={classNames('autocomplete-item', { focused: index === 0 })}
             onClick={selectItem(option, id)}
+            ref={optionRefs.current[index]}
           >
             {option}
           </div>
@@ -217,10 +221,41 @@ const Form = () => {
     }
   };
 
+  //event is fired when a key is pressed
+  const keyUpHandler = (event) => {
+    const keyCode = event.keyCode;
+
+    if (keyCode === 40) {
+      // arrow down
+      event.preventDefault();
+      optionRefs.current[focusOption - 1].current.classList.remove('focused');
+      focusOption = focusOption === optionRefs.current.length ? 0 : focusOption;
+      optionRefs.current[focusOption].current.classList.add('focused');
+      optionRefs.current[focusOption].current.scrollIntoView({
+        block: 'center',
+        behavior: 'smooth',
+      });
+      focusOption += 1;
+    } else if (keyCode === 38) {
+      // arrow up
+      event.preventDefault();
+      console.log(focusOption);
+      optionRefs.current[focusOption - 1].current.classList.remove('focused');
+      focusOption = focusOption <= 1 ? optionRefs.current.length : focusOption - 1;
+      optionRefs.current[focusOption - 1].current.classList.add('focused');
+      optionRefs.current[focusOption - 1].current.scrollIntoView({
+        block: 'center',
+        behavior: 'smooth',
+      });
+    }
+  };
+
   const makeField = () => {
     const inputsList = Object.entries(inputs);
 
-    return inputsList.map(([, { id, autocompleteOptions, status, value }]) => (
+    fieldRefs.current = inputsList.map((_, i) => fieldRefs.current[i] ?? createRef());
+
+    return inputsList.map(([, { id, autocompleteOptions, status, value }], i) => (
       <td key={_.uniqueId()}>
         <div className="input__field">
           <span className="number">{id}</span>
@@ -235,8 +270,9 @@ const Form = () => {
                 filled:
                   status === 'filled' || status === 'unfocus filled' || status === 'focus filled',
               })}
-              ref={fieldRef}
+              ref={fieldRefs.current[i]}
               value={value}
+              onKeyDown={keyUpHandler}
               onChange={changeHandler}
               autoFocus={status === 'focused' || status === 'focus filled'}
             />

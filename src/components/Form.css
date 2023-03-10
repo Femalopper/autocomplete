@@ -12,7 +12,7 @@ body {
   display: flex;
   justify-content: space-around;
   font-family: Roboto;
-  overflow-y: scroll;
+  overflow-y: hidden;
   margin-right: calc(-1 * (100vw - 100%));
   overflow-x: hidden;
 }
@@ -90,6 +90,10 @@ input {
 input:focus {
   box-shadow: 0 1px 5px rgba(10, 70, 10, 0.6);
   transition: all 0.3s ease;
+}
+
+.yellow {
+  background-color: yellow;
 }
 
 .autocomplete-wrap {
