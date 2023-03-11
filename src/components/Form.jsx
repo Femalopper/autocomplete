@@ -22,7 +22,7 @@ const Form = () => {
     setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
   }, [inputs]);
 
-  const copy = () => {
+  const copy = (id) => {
     const currentValues = Object.values(inputs).reduce((acc, { value }) => {
       if (value !== '') {
         acc = [...acc, value];
@@ -33,7 +33,48 @@ const Form = () => {
     copyBtnRef.current.innerHTML = 'Copied';
     setTimeout(() => {
       copyBtnRef.current.innerHTML = 'Copy';
+      if (!id) {
+        const nearestFieldId = getNearestUnfocusedField();
+        setInputs({
+          ...inputs,
+          [nearestFieldId]: {
+            ...inputs[nearestFieldId],
+            status: 'focused',
+          },
+        });
+      } else {
+        setInputs({
+          ...inputs,
+          [id.id]: {
+            ...inputs[id.id],
+            status: inputs[id.id].status === 'filled' ? 'focus filled' : 'focused',
+          },
+        });
+      }
     }, 500);
+  };
+
+  const pasteHandler = (event) => {
+    event.preventDefault();
+    const { target } = event;
+    const { name } = target;
+    let currentName = +name - 1;
+    navigator.clipboard.readText().then((clipText) => {
+      const copiedValues = clipText.split(',');
+      const diff = fieldRefs.current.length - name;
+      const fillRest = copiedValues.slice(0, diff + 1).reduce((acc, copiedValue) => {
+        currentName += 1;
+        return {
+          ...acc,
+          [currentName]: {
+            ...inputs[currentName],
+            value: copiedValue,
+            status: options.includes(copiedValue) ? 'filled' : 'unfocused',
+          },
+        };
+      }, {});
+      setInputs({ ...inputs, ...fillRest });
+    });
   };
 
   const getNearestUnfocusedField = () => {
@@ -225,10 +266,6 @@ const Form = () => {
     const { target } = event;
     const { name } = target;
 
-    if (target.classList.contains('copy')) {
-      return copy();
-    }
-
     if (target.classList.contains('autocomplete-item')) {
       return;
     }
@@ -237,6 +274,10 @@ const Form = () => {
     const lastFocusedItem = inputObjects.filter(
       ({ status }) => status === 'focused' || status === 'focus filled'
     );
+
+    if (target.classList.contains('copy')) {
+      return copy(lastFocusedItem[0]);
+    }
 
     if (lastFocusedItem.length === 0 && target.classList.contains('autocomplete-input')) {
       setInputs({
@@ -350,6 +391,7 @@ const Form = () => {
               value={value}
               onKeyDown={keyUpHandler}
               onChange={changeHandler}
+              onPaste={pasteHandler}
               autoFocus={status === 'focused' || status === 'focus filled'}
             />
             {(status === 'focused' || status === 'focus filled') && formState !== 'firstLoad'
