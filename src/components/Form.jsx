@@ -10,7 +10,16 @@ const Form = () => {
   const optionRefs = useRef([]);
   const [inputs, setInputs] = useState(fields);
   const [formState, setFormState] = useState('firstLoad');
+  const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
   let focusOption = 1;
+
+  useEffect(() => {
+    const filledFealds = Object.values(inputs).filter(
+      ({ status }) =>
+        status === 'filled' || status === 'focus filled' || status === 'unfocus filled'
+    );
+    setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
+  }, [inputs]);
 
   const getNearestUnfocusedField = () => {
     const nearstUnfocusedField = Object.values(inputs).filter(
@@ -348,7 +357,12 @@ const Form = () => {
                   </button>
                 </td>
                 <td id="buttn">
-                  <button type="submit" id="submit__button" className="submit">
+                  <button
+                    type="submit"
+                    id="submit__button"
+                    className="submit"
+                    disabled={submitBtnDisable}
+                  >
                     Submit
                   </button>
                 </td>
