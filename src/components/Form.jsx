@@ -16,6 +16,7 @@ const Form = () => {
     const nearstUnfocusedField = Object.values(inputs).filter(
       ({ status }) => status === 'unfocused'
     );
+    if (nearstUnfocusedField.length === 0) return;
     const [first] = nearstUnfocusedField;
     const nearstUnfocusedFieldId = first.id;
     return nearstUnfocusedFieldId;
@@ -120,6 +121,19 @@ const Form = () => {
     if (filteredHintsList.includes(inputLetters)) {
       const nearstUnfocusedField = getNearestUnfocusedField();
 
+      if (!nearstUnfocusedField) {
+        setInputs({
+          ...inputs,
+          [target.name]: {
+            ...inputs[target.name],
+            autocompleteOptions: filteredHintsList,
+            value,
+            status: 'filled',
+          },
+        });
+        return;
+      }
+
       setInputs({
         ...inputs,
         [target.name]: {
@@ -148,6 +162,13 @@ const Form = () => {
 
   const selectItem = (option, id) => {
     const nearstUnfocusedField = getNearestUnfocusedField();
+    if (!nearstUnfocusedField) {
+      setInputs({
+        ...inputs,
+        [id]: { ...inputs[id], value: option, status: 'filled' },
+      });
+      return;
+    }
 
     setInputs({
       ...inputs,
