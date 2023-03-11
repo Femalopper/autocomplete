@@ -8,6 +8,7 @@ import options from '../data/words.json';
 const Form = () => {
   const fieldRefs = useRef([]);
   const optionRefs = useRef([]);
+  const copyBtnRef = useRef();
   const [inputs, setInputs] = useState(fields);
   const [formState, setFormState] = useState('firstLoad');
   const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
@@ -20,6 +21,20 @@ const Form = () => {
     );
     setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
   }, [inputs]);
+
+  const copy = () => {
+    const currentValues = Object.values(inputs).reduce((acc, { value }) => {
+      if (value !== '') {
+        acc = [...acc, value];
+      }
+      return acc;
+    }, []);
+    navigator.clipboard.writeText(currentValues);
+    copyBtnRef.current.innerHTML = 'Copied';
+    setTimeout(() => {
+      copyBtnRef.current.innerHTML = 'Copy';
+    }, 500);
+  };
 
   const getNearestUnfocusedField = () => {
     const nearstUnfocusedField = Object.values(inputs).filter(
@@ -205,10 +220,14 @@ const Form = () => {
     );
   };
 
-  const autofocus = (event) => {
+  const clickHandler = (event) => {
     event.preventDefault();
     const { target } = event;
     const { name } = target;
+
+    if (target.classList.contains('copy')) {
+      return copy();
+    }
 
     if (target.classList.contains('autocomplete-item')) {
       return;
@@ -343,7 +362,7 @@ const Form = () => {
   };
 
   return (
-    <div className="wrapper" onClick={autofocus}>
+    <div className="wrapper" onClick={clickHandler}>
       <main id="page1" className="main">
         <h4>Enter your seed phrase</h4>
         <form className="input__wrap">
@@ -352,7 +371,7 @@ const Form = () => {
               <tr className="row">{makeField()}</tr>
               <tr className="row">
                 <td>
-                  <button id="copy__button" className="submit">
+                  <button id="copy__button" className="copy submit" ref={copyBtnRef}>
                     Copy
                   </button>
                 </td>
