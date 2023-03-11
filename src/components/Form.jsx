@@ -21,6 +21,21 @@ const Form = () => {
     return nearstUnfocusedFieldId;
   };
 
+  const unfocusAllItems = () => {
+    const inputObjects = Object.values(inputs);
+    const currentFocusedItem = inputObjects.filter(
+      ({ status }) => status === 'focused' || status === 'focus filled'
+    );
+    const currentFocusedItemId = currentFocusedItem[0].id;
+    setInputs({
+      ...inputs,
+      [currentFocusedItemId]: {
+        ...inputs[currentFocusedItemId],
+        status: inputs[currentFocusedItemId].status === 'focused' ? 'unfocused' : 'unfocus filled',
+      },
+    });
+  };
+
   const changeHandler = (event) => {
     event.preventDefault();
 
@@ -171,49 +186,54 @@ const Form = () => {
     }
 
     const inputObjects = Object.values(inputs);
-    const currentFocusedItem = inputObjects.filter(
+    const lastFocusedItem = inputObjects.filter(
       ({ status }) => status === 'focused' || status === 'focus filled'
     );
 
-    if (currentFocusedItem.length === 0 && target.classList.contains('autocomplete-input')) {
-      setInputs({
-        ...inputs,
-        [name]: { ...inputs[name], status: 'focused' },
-      });
-      return;
-    }
-    if (currentFocusedItem.length === 0) {
-      return;
-    }
-    const currentFocusedItemId = currentFocusedItem[0].id;
-    if (!target.classList.contains('autocomplete-input')) {
-      setInputs({
-        ...inputs,
-        [currentFocusedItemId]: { ...inputs[currentFocusedItemId], status: 'unfocused' },
-      });
-      return;
-    }
-    if (currentFocusedItem.length !== 0 && target.classList.contains('autocomplete-input')) {
+    if (lastFocusedItem.length === 0 && target.classList.contains('autocomplete-input')) {
       setInputs({
         ...inputs,
         [name]: {
           ...inputs[name],
           status: inputs[name].status === 'unfocused' ? 'focused' : 'focus filled',
         },
-        [currentFocusedItemId]: {
-          ...inputs[currentFocusedItemId],
-          status:
-            inputs[currentFocusedItemId].status === 'focused' ? 'unfocused' : 'unfocus filled',
+      });
+      return;
+    }
+    if (lastFocusedItem.length === 0) {
+      return;
+    }
+    const lastFocusedItemId = lastFocusedItem[0].id;
+    if (!target.classList.contains('autocomplete-input')) {
+      setInputs({
+        ...inputs,
+        [lastFocusedItemId]: {
+          ...inputs[lastFocusedItemId],
+          status: inputs[lastFocusedItemId].status === 'focused' ? 'unfocused' : 'unfocus filled',
         },
       });
       return;
     }
-    if (currentFocusedItemId !== name && target.classList.contains('autocomplete-input')) {
+    if (lastFocusedItem.length !== 0 && target.classList.contains('autocomplete-input')) {
+      setInputs({
+        ...inputs,
+        [name]: {
+          ...inputs[name],
+          status: inputs[name].status === 'unfocused' ? 'focused' : 'focus filled',
+        },
+        [lastFocusedItemId]: {
+          ...inputs[lastFocusedItemId],
+          status: inputs[lastFocusedItemId].status === 'focused' ? 'unfocused' : 'unfocus filled',
+        },
+      });
+      return;
+    }
+    if (lastFocusedItemId !== name && target.classList.contains('autocomplete-input')) {
       setInputs({
         ...inputs,
         [name]: { ...inputs[name], status: 'focused' },
-        [currentFocusedItemId]: {
-          ...inputs[currentFocusedItemId],
+        [lastFocusedItemId]: {
+          ...inputs[lastFocusedItemId],
           status: 'unfocused',
         },
       });
@@ -238,7 +258,6 @@ const Form = () => {
     } else if (keyCode === 38) {
       // arrow up
       event.preventDefault();
-      console.log(focusOption);
       optionRefs.current[focusOption - 1].current.classList.remove('focused');
       focusOption = focusOption <= 1 ? optionRefs.current.length : focusOption - 1;
       optionRefs.current[focusOption - 1].current.classList.add('focused');
@@ -246,6 +265,9 @@ const Form = () => {
         block: 'center',
         behavior: 'smooth',
       });
+    } else if (keyCode === 27) {
+      // escape
+      unfocusAllItems();
     }
   };
 
