@@ -146,10 +146,9 @@ const Form = () => {
     }
   };
 
-  const selectItem = (option, id) => (event) => {
+  const selectItem = (option, id) => {
     const nearstUnfocusedField = getNearestUnfocusedField();
 
-    event.preventDefault();
     setInputs({
       ...inputs,
       [id]: { ...inputs[id], value: option, status: 'filled' },
@@ -166,7 +165,7 @@ const Form = () => {
           <div
             key={_.uniqueId()}
             className={classNames('autocomplete-item', { focused: index === 0 })}
-            onClick={selectItem(option, id)}
+            onClick={() => selectItem(option, id)}
             ref={optionRefs.current[index]}
           >
             {option}
@@ -244,8 +243,10 @@ const Form = () => {
   //event is fired when a key is pressed
   const keyUpHandler = (event) => {
     const keyCode = event.keyCode;
+    const { target } = event;
+    const { name } = target;
 
-    if (keyCode === 40 || keyCode === 9) {
+    if ((keyCode === 40 || keyCode === 9) && optionRefs.current.length !== 0) {
       // arrow down and tab
       event.preventDefault();
       optionRefs.current[focusOption - 1].current.classList.remove('focused');
@@ -255,7 +256,7 @@ const Form = () => {
         block: 'center',
         behavior: 'smooth',
       });
-    } else if (keyCode === 38) {
+    } else if (keyCode === 38 && optionRefs.current.length !== 0) {
       // arrow up
       event.preventDefault();
       optionRefs.current[focusOption - 1].current.classList.remove('focused');
@@ -268,6 +269,11 @@ const Form = () => {
     } else if (keyCode === 27) {
       // escape
       unfocusAllItems();
+    } else if (keyCode === 13 && optionRefs.current.length !== 0) {
+      // enter
+      event.preventDefault();
+      const currentOptionValue = optionRefs.current[focusOption - 1].current.textContent;
+      selectItem(currentOptionValue, name);
     }
   };
 
