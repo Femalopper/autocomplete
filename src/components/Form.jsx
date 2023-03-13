@@ -55,6 +55,69 @@ const Form = () => {
     }, 500);
   };
 
+  const filterWords = (value) => {
+    const sortedOptions = options.sort((a, b) => a.localeCompare(b));
+    const inputLetters = value.toLowerCase();
+    //filter the list of hints according to the pressed key
+    const filterOptions = () => {
+      let low = 0;
+      let high = sortedOptions.length - 1;
+
+      while (low <= high) {
+        const midWordIndex = Math.floor((low + high) / 2);
+        const midWordSubstring = sortedOptions[midWordIndex]
+          .slice(0, inputLetters.length)
+          .toLowerCase();
+        if (midWordSubstring === inputLetters) {
+          return midWordIndex;
+        } else if (midWordSubstring < inputLetters) {
+          low = midWordIndex + 1;
+        } else if (midWordSubstring > inputLetters) {
+          high = midWordIndex - 1;
+        }
+      }
+    };
+
+    const midWord = filterOptions();
+
+    const filterLeftOptions = () => {
+      let low = 0;
+      let high = midWord;
+
+      while (low <= high) {
+        const midWordIndex = Math.floor((low + high) / 2);
+        const midWordSubstring = sortedOptions[midWordIndex]
+          .slice(0, inputLetters.length)
+          .toLowerCase();
+        if (midWordSubstring === inputLetters) {
+          return midWordIndex;
+        } else if (midWordSubstring < inputLetters) {
+          low = midWordIndex + 1;
+        }
+      }
+    };
+
+    const filterRightOptions = () => {
+      let low = midWord;
+      let high = options.length - 1;
+
+      while (low <= high) {
+        const midWordIndex = Math.floor((low + high) / 2);
+        const midWordSubstring = sortedOptions[midWordIndex]
+          .slice(0, inputLetters.length)
+          .toLowerCase();
+        if (midWordSubstring === inputLetters) {
+          return midWordIndex;
+        } else if (midWordSubstring > inputLetters) {
+          high = midWordIndex - 1;
+        }
+      }
+    };
+
+    const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
+    return filteredHintsList;
+  };
+
   const pasteHandler = (event) => {
     event.preventDefault();
     setFormState('updated');
@@ -70,72 +133,6 @@ const Form = () => {
           ({ value }) => value === copiedValue
         );
 
-        const filterWords = () => {
-          const sortedOptions = options.sort((a, b) => a.localeCompare(b));
-          const inputLetters = copiedValue.toLowerCase();
-          //filter the list of hints according to the pressed key
-          const filterOptions = () => {
-            let low = 0;
-            let high = sortedOptions.length - 1;
-
-            while (low <= high) {
-              const midWordIndex = Math.floor((low + high) / 2);
-              const midWordSubstring = sortedOptions[midWordIndex]
-                .slice(0, inputLetters.length)
-                .toLowerCase();
-              if (midWordSubstring === inputLetters) {
-                return midWordIndex;
-              } else if (midWordSubstring < inputLetters) {
-                low = midWordIndex + 1;
-              } else if (midWordSubstring > inputLetters) {
-                high = midWordIndex - 1;
-              }
-            }
-          };
-
-          const midWord = filterOptions();
-
-          const filterLeftOptions = () => {
-            let low = 0;
-            let high = midWord;
-
-            while (low <= high) {
-              const midWordIndex = Math.floor((low + high) / 2);
-              const midWordSubstring = sortedOptions[midWordIndex]
-                .slice(0, inputLetters.length)
-                .toLowerCase();
-              if (midWordSubstring === inputLetters) {
-                return midWordIndex;
-              } else if (midWordSubstring < inputLetters) {
-                low = midWordIndex + 1;
-              }
-            }
-          };
-
-          const filterRightOptions = () => {
-            let low = midWord;
-            let high = options.length - 1;
-
-            while (low <= high) {
-              const midWordIndex = Math.floor((low + high) / 2);
-              const midWordSubstring = sortedOptions[midWordIndex]
-                .slice(0, inputLetters.length)
-                .toLowerCase();
-              if (midWordSubstring === inputLetters) {
-                return midWordIndex;
-              } else if (midWordSubstring > inputLetters) {
-                high = midWordIndex - 1;
-              }
-            }
-          };
-
-          const filteredHintsList = sortedOptions.slice(
-            filterLeftOptions(),
-            filterRightOptions() + 1
-          );
-          return filteredHintsList;
-        };
-
         return {
           ...acc,
           [currentName]: {
@@ -143,11 +140,11 @@ const Form = () => {
             value: copiedValue,
             autocompleteOptions:
               copiedValueOptions.length === 0
-                ? filterWords()
+                ? filterWords(copiedValue)
                 : copiedValueOptions[0].autocompleteOptions,
-            status: filterWords().includes(copiedValue)
+            status: filterWords(copiedValue).includes(copiedValue)
               ? 'filled'
-              : filterWords().length !== 0
+              : filterWords(copiedValue).length !== 0
               ? 'filling'
               : 'focused',
           },
@@ -261,7 +258,7 @@ const Form = () => {
         },
       });
       return;
-    } else if (filterLeftOptions() >= 0 || filterRightOptions() >= 0) {
+    } else if (filteredHintsList.length !== 0) {
       setInputs({
         ...inputs,
         [target.name]: {
@@ -357,7 +354,7 @@ const Form = () => {
     const { target } = event;
     const { name } = target;
 
-    if ((keyCode === 40 || keyCode === 9) && inputs[name].status === 'filling') {
+    if ((keyCode === 40 || keyCode === 9) && optionRefs.current[0].current) {
       // arrow down and tab
       event.preventDefault();
       optionRefs.current[focusOption - 1].current.classList.remove('focused');
@@ -383,9 +380,8 @@ const Form = () => {
       unfocusAllItems();
     } else if (keyCode === 13) {
       // enter
-      console.log(inputs[name].status);
       event.preventDefault();
-      if (inputs[name].status === 'filling') {
+      if (optionRefs.current[0].current) {
         const currentOptionValue = optionRefs.current[focusOption - 1].current.textContent;
         selectItem(currentOptionValue, name);
       }
