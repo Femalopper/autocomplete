@@ -16,9 +16,7 @@ const Form = () => {
   let focusOption = 1;
 
   useEffect(() => {
-    const filledFealds = Object.values(inputs).filter(
-      ({ status }) => status === 'filled' || status === 'focus filled'
-    );
+    const filledFealds = Object.values(inputs).filter(({ status }) => status === 'filled');
     setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
     if (filledFealds.length === fieldRefs.current.length) {
       setFormState('filled');
@@ -62,8 +60,7 @@ const Form = () => {
           ...inputs,
           [id.id]: {
             ...inputs[id.id],
-            status:
-              id.status === 'filled' || id.status === 'focus filled' ? 'focus filled' : 'focused',
+            status: id.status === 'filled' ? 'filled' : 'focused',
           },
         });
       }
@@ -174,7 +171,7 @@ const Form = () => {
   const unfocusAllItems = () => {
     const inputObjects = Object.values(inputs);
     const currentFocusedItem = inputObjects.filter(
-      ({ status }) => status === 'focused' || status === 'focus filled' || status === 'filling'
+      ({ status }) => status === 'focused' || status === 'filling'
     );
 
     const currentFocusedItemId = currentFocusedItem[0].id;
@@ -379,7 +376,7 @@ const Form = () => {
 
     const inputObjects = Object.values(inputs);
     const lastFocusedItem = inputObjects.filter(
-      ({ status }) => status === 'focused' || status === 'focus filled' || status === 'filling'
+      ({ status }) => status === 'focused' || status === 'filling'
     );
 
     if (target.classList.contains('copy')) {
@@ -469,7 +466,7 @@ const Form = () => {
               tabIndex={id}
               name={id}
               className={classNames('autocomplete-input', {
-                filled: status === 'filled' || status === 'focus filled',
+                filled: status === 'filled',
               })}
               ref={fieldRefs.current[i]}
               value={value}
