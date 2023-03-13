@@ -8,6 +8,7 @@ import options from '../data/words.json';
 const Form = () => {
   const fieldRefs = useRef([]);
   const optionRefs = useRef([]);
+  const formRef = useRef();
   const copyBtnRef = useRef();
   const submitBtnRef = useRef();
   const [inputs, setInputs] = useState(fields);
@@ -258,9 +259,14 @@ const Form = () => {
   };
 
   const clickHandler = (event) => {
+    console.log('click');
     event.preventDefault();
     const { target } = event;
     const { name, value, textContent, dataset } = target;
+
+    if (target.classList.contains('sb')) {
+      return confirmForm();
+    }
 
     if (target.classList.contains('autocomplete-item')) {
       const inputId = dataset.input;
@@ -334,6 +340,29 @@ const Form = () => {
     }
   };
 
+  const confirmForm = () => {
+    console.log('f');
+    const submitFormData = _.cloneDeep(inputs);
+    setInputs(fields);
+    setFormState('firstLoad');
+    setSubmitBtnDisable(true);
+    setActiveField('1');
+    focusOption = 1;
+
+    //перенести в useEffect
+
+    const getInputValues = (data) => {
+      const inputValues = Object.values(data).filter(({ value }) => value);
+      return inputValues.join('');
+    };
+
+    if (formState === 'filled') {
+      const submitData = getInputValues(submitFormData);
+      const confirmData = getInputValues(inputs);
+      return submitData === confirmData ? alert('success') : alert('fail');
+    }
+  };
+
   const makeField = () => {
     const inputsList = Object.entries(inputs);
 
@@ -376,7 +405,7 @@ const Form = () => {
     <div className="wrapper" onClick={clickHandler}>
       <main id="page1" className="main">
         <h4>Enter your seed phrase</h4>
-        <form className="input__wrap">
+        <form className="input__wrap" ref={formRef}>
           <table>
             <tbody>
               <tr className="row">{makeField()}</tr>
@@ -390,7 +419,7 @@ const Form = () => {
                   <button
                     type="submit"
                     id="submit__button"
-                    className="submit"
+                    className="submit sb"
                     disabled={submitBtnDisable}
                     ref={submitBtnRef}
                   >
