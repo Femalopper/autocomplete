@@ -142,7 +142,9 @@ input:focus {
   color: rgb(60, 55, 55);
 }
 
-.submit {
+.submit,
+.copy,
+.confirm {
   width: 150px;
   height: 38px;
   background: rgba(174, 243, 220, 0.5);
@@ -163,7 +165,9 @@ input:focus {
   margin-bottom: 1%;
 }
 
-.submit:focus {
+.submit:focus,
+.confirm:focus,
+.copy:focus {
   box-shadow: 0 1px 5px rgba(10, 70, 10, 0.6);
   border-color: aquamarine;
 }

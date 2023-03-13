@@ -11,21 +11,24 @@ const Form = () => {
   const formRef = useRef();
   const copyBtnRef = useRef();
   const submitBtnRef = useRef();
+  const confirmBtnRef = useRef();
   const [inputs, setInputs] = useState(fields);
   const [formState, setFormState] = useState('firstLoad');
   const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
+  const [confirmBtnDisable, setConfirmBtnDisable] = useState(true);
   const [activeField, setActiveField] = useState('1');
   let focusOption = 1;
+  const submitFormData = _.cloneDeep(inputs);
 
   useEffect(() => {
     const filledFealds = Object.values(inputs).filter(({ status }) => status === 'filled');
     setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
     if (filledFealds.length === fieldRefs.current.length) {
-      setFormState('filled');
       unfocusAllItems();
-      copyBtnRef.current.focus();
+      setFormState('filled');
+      confirmBtnDisable === true ? copyBtnRef.current.focus() : confirmBtnRef.current.focus();
     }
-  }, [inputs]);
+  }, [inputs, confirmBtnDisable]);
 
   const getNearestUnfilledField = (fields = inputs) => {
     const nearstUnfilledField = Object.values(fields).filter(
@@ -264,8 +267,21 @@ const Form = () => {
     const { target } = event;
     const { name, value, textContent, dataset } = target;
 
-    if (target.classList.contains('sb')) {
-      return confirmForm();
+    if (target.classList.contains('submit')) {
+      return submitForm();
+    }
+
+    if (target.classList.contains('confirm')) {
+      const getInputValues = (data) => {
+        const inputValues = Object.values(data).map(({ value }) => value);
+        return inputValues.join('');
+      };
+
+      if (formState === 'filled') {
+        const submitData = getInputValues(submitFormData);
+        const confirmData = getInputValues(inputs);
+        return submitData === confirmData ? alert('success') : alert('fail');
+      }
     }
 
     if (target.classList.contains('autocomplete-item')) {
@@ -340,27 +356,13 @@ const Form = () => {
     }
   };
 
-  const confirmForm = () => {
-    console.log('f');
-    const submitFormData = _.cloneDeep(inputs);
+  const submitForm = () => {
     setInputs(fields);
     setFormState('firstLoad');
     setSubmitBtnDisable(true);
     setActiveField('1');
+    setConfirmBtnDisable(false);
     focusOption = 1;
-
-    //перенести в useEffect
-
-    const getInputValues = (data) => {
-      const inputValues = Object.values(data).filter(({ value }) => value);
-      return inputValues.join('');
-    };
-
-    if (formState === 'filled') {
-      const submitData = getInputValues(submitFormData);
-      const confirmData = getInputValues(inputs);
-      return submitData === confirmData ? alert('success') : alert('fail');
-    }
   };
 
   const makeField = () => {
@@ -409,24 +411,34 @@ const Form = () => {
           <table>
             <tbody>
               <tr className="row">{makeField()}</tr>
-              <tr className="row">
-                <td>
-                  <button id="copy__button" className="copy submit" ref={copyBtnRef}>
-                    Copy
-                  </button>
-                </td>
-                <td id="buttn">
-                  <button
-                    type="submit"
-                    id="submit__button"
-                    className="submit sb"
-                    disabled={submitBtnDisable}
-                    ref={submitBtnRef}
-                  >
-                    Submit
-                  </button>
-                </td>
-              </tr>
+              {confirmBtnDisable === false ? (
+                <tr className="row">
+                  <td>
+                    <button id="copy__button" className="confirm" ref={confirmBtnRef}>
+                      Confirm
+                    </button>
+                  </td>
+                </tr>
+              ) : (
+                <tr className="row">
+                  <td>
+                    <button id="copy__button" className="copy" ref={copyBtnRef}>
+                      Copy
+                    </button>
+                  </td>
+                  <td id="buttn">
+                    <button
+                      type="submit"
+                      id="submit__button"
+                      className="submit"
+                      disabled={submitBtnDisable}
+                      ref={submitBtnRef}
+                    >
+                      Submit
+                    </button>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </form>
