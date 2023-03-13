@@ -55,6 +55,7 @@ const Form = () => {
     }, 500);
   };
 
+  //filter the list of hints according to the pressed key
   const filterWords = (value) => {
     const sortedOptions = options.sort((a, b) => a.localeCompare(b));
     const inputLetters = value.toLowerCase();
@@ -184,64 +185,9 @@ const Form = () => {
 
     if (value.trim() === '') return;
 
-    const sortedOptions = options.sort((a, b) => a.localeCompare(b));
     const inputLetters = value.toLowerCase();
-    //filter the list of hints according to the pressed key
-    const filterOptions = () => {
-      let low = 0;
-      let high = sortedOptions.length - 1;
 
-      while (low <= high) {
-        const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex]
-          .slice(0, inputLetters.length)
-          .toLowerCase();
-        if (midWordSubstring === inputLetters) {
-          return midWordIndex;
-        } else if (midWordSubstring < inputLetters) {
-          low = midWordIndex + 1;
-        } else if (midWordSubstring > inputLetters) {
-          high = midWordIndex - 1;
-        }
-      }
-    };
-
-    const midWord = filterOptions();
-
-    const filterLeftOptions = () => {
-      let low = 0;
-      let high = midWord;
-
-      while (low <= high) {
-        const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex]
-          .slice(0, inputLetters.length)
-          .toLowerCase();
-        if (midWordSubstring === inputLetters) {
-          return midWordIndex;
-        } else if (midWordSubstring < inputLetters) {
-          low = midWordIndex + 1;
-        }
-      }
-    };
-
-    const filterRightOptions = () => {
-      let low = midWord;
-      let high = options.length - 1;
-
-      while (low <= high) {
-        const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex]
-          .slice(0, inputLetters.length)
-          .toLowerCase();
-        if (midWordSubstring === inputLetters) {
-          return midWordIndex;
-        } else if (midWordSubstring > inputLetters) {
-          high = midWordIndex - 1;
-        }
-      }
-    };
-    const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
+    const filteredHintsList = filterWords(value);
 
     if (filteredHintsList.includes(inputLetters)) {
       const nearstUnfilledField = getNearestUnfilledField();
@@ -349,7 +295,7 @@ const Form = () => {
   };
 
   //event is fired when a key is pressed
-  const keyUpHandler = (event) => {
+  const keyDownHandler = (event) => {
     const keyCode = event.keyCode;
     const { target } = event;
     const { name } = target;
@@ -389,7 +335,6 @@ const Form = () => {
   };
 
   const makeField = () => {
-    console.log(inputs);
     const inputsList = Object.entries(inputs);
 
     fieldRefs.current = inputsList.map((_, i) => fieldRefs.current[i] ?? createRef());
@@ -410,7 +355,7 @@ const Form = () => {
               })}
               ref={fieldRefs.current[i]}
               value={value}
-              onKeyDown={keyUpHandler}
+              onKeyDown={keyDownHandler}
               onChange={changeHandler}
               onPaste={pasteHandler}
               autoFocus={activeField === id && formState !== 'disable'}
