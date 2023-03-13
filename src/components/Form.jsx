@@ -9,6 +9,7 @@ const Form = () => {
   const fieldRefs = useRef([]);
   const optionRefs = useRef([]);
   const copyBtnRef = useRef();
+  const submitBtnRef = useRef();
   const [inputs, setInputs] = useState(fields);
   const [formState, setFormState] = useState('firstLoad');
   const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
@@ -20,19 +21,21 @@ const Form = () => {
     setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
     if (filledFealds.length === fieldRefs.current.length) {
       setFormState('filled');
+      unfocusAllItems();
+      copyBtnRef.current.focus();
     }
-  }, [inputs, formState]);
+  }, [inputs]);
 
   const getNearestUnfilledField = (fields = inputs) => {
-    const nearstUnfocusedField = Object.values(fields).filter(
+    const nearstUnfilledField = Object.values(fields).filter(
       ({ status, id }) => status !== 'filled' && id !== activeField
     );
-    if (nearstUnfocusedField.length === 0) return;
-    const [first] = nearstUnfocusedField;
+    if (nearstUnfilledField.length === 0) return;
+    const [first] = nearstUnfilledField;
     return first.id;
   };
 
-  const copy = (id) => {
+  const copy = () => {
     const currentValues = Object.values(inputs).reduce((acc, { value }) => {
       if (value !== '') {
         acc = [...acc, value];
@@ -43,27 +46,12 @@ const Form = () => {
     copyBtnRef.current.innerHTML = 'Copied';
     setTimeout(() => {
       copyBtnRef.current.innerHTML = 'Copy';
-      if (!id) {
-        const nearstUnfilledField = getNearestUnfilledField();
-        if (!nearstUnfilledField) return;
-        setActiveField(nearstUnfilledField);
-
-        setInputs({
-          ...inputs,
-          [nearstUnfilledField]: {
-            ...inputs[nearstUnfilledField],
-            status: 'focused',
-          },
-        });
-      } else {
-        setInputs({
-          ...inputs,
-          [id.id]: {
-            ...inputs[id.id],
-            status: id.status === 'filled' ? 'filled' : 'focused',
-          },
-        });
+      const nearstUnfilledField = getNearestUnfilledField();
+      if (!nearstUnfilledField) {
+        submitBtnRef.current.focus();
+        return;
       }
+      setActiveField(nearstUnfilledField);
     }, 500);
   };
 
@@ -157,7 +145,11 @@ const Form = () => {
               copiedValueOptions.length === 0
                 ? filterWords()
                 : copiedValueOptions[0].autocompleteOptions,
-            status: filterWords().includes(copiedValue) ? 'filled' : 'unfocused',
+            status: filterWords().includes(copiedValue)
+              ? 'filled'
+              : filterWords().length !== 0
+              ? 'filling'
+              : 'focused',
           },
         };
       }, {});
@@ -169,23 +161,7 @@ const Form = () => {
   };
 
   const unfocusAllItems = () => {
-    const inputObjects = Object.values(inputs);
-    const currentFocusedItem = inputObjects.filter(
-      ({ status }) => status === 'focused' || status === 'filling'
-    );
-
-    const currentFocusedItemId = currentFocusedItem[0].id;
-    setInputs({
-      ...inputs,
-      [currentFocusedItemId]: {
-        ...inputs[currentFocusedItemId],
-        status:
-          inputs[currentFocusedItemId].status === 'focused' ||
-          inputs[currentFocusedItemId].status === 'filling'
-            ? 'unfocused'
-            : 'filled',
-      },
-    });
+    setFormState('disable');
   };
 
   const changeHandler = (event) => {
@@ -203,7 +179,7 @@ const Form = () => {
           ...inputs[target.name],
           autocompleteOptions: options,
           value,
-          status: 'focused',
+          status: 'filling',
         },
       });
       return;
@@ -269,23 +245,9 @@ const Form = () => {
       }
     };
     const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
-    console.log(filteredHintsList);
 
     if (filteredHintsList.includes(inputLetters)) {
       const nearstUnfilledField = getNearestUnfilledField();
-
-      if (!nearstUnfilledField) {
-        setInputs({
-          ...inputs,
-          [target.name]: {
-            ...inputs[target.name],
-            autocompleteOptions: filteredHintsList,
-            value,
-            status: 'filled',
-          },
-        });
-        return;
-      }
 
       setActiveField(nearstUnfilledField);
 
@@ -296,10 +258,6 @@ const Form = () => {
           autocompleteOptions: filteredHintsList,
           value,
           status: 'filled',
-        },
-        [nearstUnfilledField]: {
-          ...inputs[nearstUnfilledField],
-          status: 'filling',
         },
       });
       return;
@@ -328,20 +286,12 @@ const Form = () => {
   };
 
   const selectItem = (option, id) => {
-    let nearstUnfilledField = getNearestUnfilledField();
+    const nearstUnfilledField = getNearestUnfilledField();
     setActiveField(nearstUnfilledField);
-    if (!nearstUnfilledField) {
-      setInputs({
-        ...inputs,
-        [id]: { ...inputs[id], value: option, autocompleteOptions: [], status: 'filled' },
-      });
-      return;
-    }
 
     setInputs({
       ...inputs,
       [id]: { ...inputs[id], value: option, autocompleteOptions: [], status: 'filled' },
-      [nearstUnfilledField]: { ...inputs[nearstUnfilledField], status: 'filling' },
     });
   };
 
@@ -367,20 +317,15 @@ const Form = () => {
   const clickHandler = (event) => {
     event.preventDefault();
     const { target } = event;
-    const { name, value } = target;
+    const { name, value, textContent, dataset } = target;
 
     if (target.classList.contains('autocomplete-item')) {
-      const inputId = event.target.dataset.input;
-      return selectItem(event.target.textContent, inputId);
+      const inputId = dataset.input;
+      return selectItem(textContent, inputId);
     }
 
-    const inputObjects = Object.values(inputs);
-    const lastFocusedItem = inputObjects.filter(
-      ({ status }) => status === 'focused' || status === 'filling'
-    );
-
     if (target.classList.contains('copy')) {
-      return copy(lastFocusedItem[0]);
+      return copy();
     }
 
     if (target.classList.contains('autocomplete-input')) {
@@ -402,8 +347,7 @@ const Form = () => {
     }
 
     if (!target.classList.contains('autocomplete-input')) {
-      setFormState('disable');
-      return;
+      return unfocusAllItems();
     }
   };
 
@@ -507,6 +451,7 @@ const Form = () => {
                     id="submit__button"
                     className="submit"
                     disabled={submitBtnDisable}
+                    ref={submitBtnRef}
                   >
                     Submit
                   </button>
