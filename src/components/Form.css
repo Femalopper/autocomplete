@@ -114,7 +114,7 @@ input:focus {
   top: 100%;
   border: 1px solid #97b46c;
   width: 100%;
-  z-index: 9999;
+  z-index: 999;
   max-height: 300px;
   overflow-y: auto;
   display: block;
@@ -204,6 +204,7 @@ input:focus {
 }
 
 .animate-ul {
+  display: flex;
   justify-content: center;
   width: 100%;
   margin: 0;
@@ -212,7 +213,6 @@ input:focus {
 }
 
 .animate-ul li {
-  display: flex;
   list-style: none;
   letter-spacing: 1px;
   color: rgba(33, 117, 112, 0.5);

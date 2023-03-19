@@ -4,6 +4,7 @@ import _ from 'lodash';
 import fields from '../data/fields.json';
 import classNames from 'classnames';
 import options from '../data/words.json';
+import Swal from 'sweetalert2';
 
 const Form = () => {
   const fieldRefs = useRef([]);
@@ -17,8 +18,8 @@ const Form = () => {
   const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
   const [confirmBtnDisable, setConfirmBtnDisable] = useState(true);
   const [activeField, setActiveField] = useState('1');
+  const [submitFormData, setSubmitFormData] = useState({});
   let focusOption = 1;
-  const submitFormData = _.cloneDeep(inputs);
 
   useEffect(() => {
     const filledFealds = Object.values(inputs).filter(({ status }) => status === 'filled');
@@ -262,13 +263,14 @@ const Form = () => {
   };
 
   const clickHandler = (event) => {
-    console.log('click');
     event.preventDefault();
     const { target } = event;
     const { name, value, textContent, dataset } = target;
 
     if (target.classList.contains('submit')) {
-      return submitForm();
+      setSubmitFormData(inputs);
+      submitForm();
+      return;
     }
 
     if (target.classList.contains('confirm')) {
@@ -277,11 +279,16 @@ const Form = () => {
         return inputValues.join('');
       };
 
-      if (formState === 'filled') {
-        const submitData = getInputValues(submitFormData);
-        const confirmData = getInputValues(inputs);
-        return submitData === confirmData ? alert('success') : alert('fail');
-      }
+      const submitData = getInputValues(submitFormData);
+      const confirmData = getInputValues(inputs);
+      return submitData === confirmData
+        ? setFormState('confirmed')
+        : Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Mistake! Try again!',
+            confirmButtonColor: 'rgba(127, 255, 212, 0.4)',
+          });
     }
 
     if (target.classList.contains('autocomplete-item')) {
@@ -358,7 +365,7 @@ const Form = () => {
 
   const submitForm = () => {
     setInputs(fields);
-    setFormState('firstLoad');
+    setFormState('submitted');
     setSubmitBtnDisable(true);
     setActiveField('1');
     setConfirmBtnDisable(false);
@@ -383,6 +390,7 @@ const Form = () => {
               name={id}
               className={classNames('autocomplete-input', {
                 filled: status === 'filled',
+                input__out: formState === 'confirmed',
               })}
               ref={fieldRefs.current[i]}
               value={value}
@@ -406,7 +414,23 @@ const Form = () => {
   return (
     <div className="wrapper" onClick={clickHandler}>
       <main id="page1" className="main">
-        <h4>Enter your seed phrase</h4>
+        {formState === 'confirmed' ? (
+          <ul id="success" className="animate-ul">
+            <li>S</li>
+            <li>U</li>
+            <li>C</li>
+            <li>C</li>
+            <li>E</li>
+            <li>S</li>
+            <li>S</li>
+          </ul>
+        ) : (
+          <h4>
+            {confirmBtnDisable === false
+              ? 'Enter your seed phrase to confirm you wrote it down properly'
+              : 'Enter your seed phrase'}
+          </h4>
+        )}
         <form className="input__wrap" ref={formRef}>
           <table>
             <tbody>
