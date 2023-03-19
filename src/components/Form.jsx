@@ -18,18 +18,23 @@ const Form = () => {
   const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
   const [confirmBtnDisable, setConfirmBtnDisable] = useState(true);
   const [activeField, setActiveField] = useState('1');
-  const [submitFormData, setSubmitFormData] = useState({});
+  const [submitFormData, setSubmitFormData] = useState('');
   let focusOption = 1;
 
   useEffect(() => {
     const filledFealds = Object.values(inputs).filter(({ status }) => status === 'filled');
     setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
+    setConfirmBtnDisable(filledFealds.length !== fieldRefs.current.length);
     if (filledFealds.length === fieldRefs.current.length) {
       unfocusAllItems();
       setFormState('filled');
-      confirmBtnDisable === true ? copyBtnRef.current.focus() : confirmBtnRef.current.focus();
+      if (submitFormData === '') {
+        copyBtnRef.current.focus();
+      } else {
+        confirmBtnRef.current.focus();
+      }
     }
-  }, [inputs, confirmBtnDisable]);
+  }, [inputs, submitFormData, confirmBtnDisable]);
 
   const getNearestUnfilledField = (fields = inputs) => {
     const nearstUnfilledField = Object.values(fields).filter(
@@ -279,16 +284,44 @@ const Form = () => {
         return inputValues.join('');
       };
 
+      const findWrongWords = () => {
+        const wrongWordsId = [];
+
+        let id = 1;
+        while (id <= fieldRefs.current.length) {
+          if (submitFormData[`${id}`].value !== inputs[`${id}`].value) {
+            wrongWordsId.push(`${id}`);
+          }
+          id += 1;
+        }
+
+        const wrongWordsObj = wrongWordsId.reduce(
+          (acc, wrongWordId) => ({
+            ...acc,
+            [wrongWordId]: { ...inputs[wrongWordId], status: 'unconfirmed word' },
+          }),
+          {}
+        );
+
+        setInputs({
+          ...inputs,
+          ...wrongWordsObj,
+        });
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Mistake! Try again!',
+          confirmButtonColor: 'rgba(127, 255, 212, 0.4)',
+          didClose: () => {
+            setActiveField(wrongWordsId[0]);
+          },
+        });
+      };
+
       const submitData = getInputValues(submitFormData);
       const confirmData = getInputValues(inputs);
-      return submitData === confirmData
-        ? setFormState('confirmed')
-        : Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Mistake! Try again!',
-            confirmButtonColor: 'rgba(127, 255, 212, 0.4)',
-          });
+      return submitData === confirmData ? setFormState('confirmed') : findWrongWords();
     }
 
     if (target.classList.contains('autocomplete-item')) {
@@ -356,7 +389,7 @@ const Form = () => {
     } else if (keyCode === 13) {
       // enter
       event.preventDefault();
-      if (optionRefs.current[0].current) {
+      if (optionRefs.current.length !== 0 && optionRefs.current[0].current) {
         const currentOptionValue = optionRefs.current[focusOption - 1].current.textContent;
         selectItem(currentOptionValue, name);
       }
@@ -368,7 +401,7 @@ const Form = () => {
     setFormState('submitted');
     setSubmitBtnDisable(true);
     setActiveField('1');
-    setConfirmBtnDisable(false);
+    setConfirmBtnDisable(true);
     focusOption = 1;
   };
 
@@ -379,7 +412,11 @@ const Form = () => {
 
     return inputsList.map(([, { id, autocompleteOptions, status, value }], i) => (
       <td key={_.uniqueId()}>
-        <div className="input__field">
+        <div
+          className={classNames('input__field', {
+            wrong__word: status === 'unconfirmed word',
+          })}
+        >
           <span className="number">{id}</span>
           <div className="autocomplete-wrap">
             <input
@@ -391,6 +428,7 @@ const Form = () => {
               className={classNames('autocomplete-input', {
                 filled: status === 'filled',
                 input__out: formState === 'confirmed',
+                wrong__word__input: status === 'unconfirmed word',
               })}
               ref={fieldRefs.current[i]}
               value={value}
@@ -426,7 +464,7 @@ const Form = () => {
           </ul>
         ) : (
           <h4>
-            {confirmBtnDisable === false
+            {submitFormData !== ''
               ? 'Enter your seed phrase to confirm you wrote it down properly'
               : 'Enter your seed phrase'}
           </h4>
@@ -435,10 +473,15 @@ const Form = () => {
           <table>
             <tbody>
               <tr className="row">{makeField()}</tr>
-              {confirmBtnDisable === false ? (
+              {submitFormData !== '' ? (
                 <tr className="row">
                   <td>
-                    <button id="copy__button" className="confirm" ref={confirmBtnRef}>
+                    <button
+                      id="copy__button"
+                      className={classNames('confirm', { btn_out: formState === 'confirmed' })}
+                      ref={confirmBtnRef}
+                      disabled={confirmBtnDisable}
+                    >
                       Confirm
                     </button>
                   </td>

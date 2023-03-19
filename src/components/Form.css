@@ -172,7 +172,8 @@ input:focus {
   border-color: aquamarine;
 }
 
-.submit:disabled {
+.submit:disabled,
+.confirm:disabled {
   opacity: 0.5;
 }
 
@@ -341,4 +342,15 @@ input:focus {
   .animate-ul li {
     font-size: 2em;
   }
+}
+
+.wrong__word {
+  border: 2px solid rgb(158, 19, 19);
+  color: rgb(96, 14, 14);
+}
+
+.wrong__word__input {
+  background-color: rgb(219, 84, 84);
+  color: rgb(96, 14, 14);
+  border-left: 2px solid rgb(158, 19, 19);
 }
