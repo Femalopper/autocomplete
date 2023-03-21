@@ -1,12 +1,14 @@
+/* eslint consistent-return: off */
+
 import React, { useState, useRef, useEffect, createRef } from 'react';
 import './Form.css';
 import _ from 'lodash';
-import fields from '../data/fields.json';
 import classNames from 'classnames';
-import options from '../data/words.json';
 import Swal from 'sweetalert2';
+import fields from '../data/fields.json';
+import options from '../data/words.json';
 
-const Form = () => {
+function Form() {
   const fieldRefs = useRef([]);
   const optionRefs = useRef([]);
   const formRef = useRef();
@@ -20,6 +22,19 @@ const Form = () => {
   const [activeField, setActiveField] = useState('1');
   const [submitFormData, setSubmitFormData] = useState('');
   let focusOption = 1;
+
+  const unfocusAllItems = () => {
+    setFormState('disable');
+  };
+
+  const submitForm = () => {
+    setInputs(fields);
+    setFormState('submitted');
+    setSubmitBtnDisable(true);
+    setActiveField('1');
+    setConfirmBtnDisable(true);
+    focusOption = 1;
+  };
 
   useEffect(() => {
     const filledFealds = Object.values(inputs).filter(({ status }) => status === 'filled');
@@ -36,8 +51,8 @@ const Form = () => {
     }
   }, [inputs, submitFormData, confirmBtnDisable]);
 
-  const getNearestUnfilledField = (fields = inputs) => {
-    const nearstUnfilledField = Object.values(fields).filter(
+  const getNearestUnfilledField = (inputFields = inputs) => {
+    const nearstUnfilledField = Object.values(inputFields).filter(
       ({ status, id }) => status !== 'filled' && id !== activeField
     );
     if (nearstUnfilledField.length === 0) return;
@@ -48,7 +63,7 @@ const Form = () => {
   const copy = () => {
     const currentValues = Object.values(inputs).reduce((acc, { value }) => {
       if (value !== '') {
-        acc = [...acc, value];
+        return [...acc, value];
       }
       return acc;
     }, []);
@@ -61,15 +76,15 @@ const Form = () => {
         submitBtnRef.current.focus();
         return;
       }
-      setActiveField(nearstUnfilledField);
+      setFormState('copied');
     }, 500);
   };
 
-  //filter the list of hints according to the pressed key
+  // filter the list of hints according to the pressed key
   const filterWords = (value) => {
     const sortedOptions = options.sort((a, b) => a.localeCompare(b));
     const inputLetters = value.toLowerCase();
-    //filter the list of hints according to the pressed key
+    // filter the list of hints according to the pressed key
     const filterOptions = () => {
       let low = 0;
       let high = sortedOptions.length - 1;
@@ -81,7 +96,8 @@ const Form = () => {
           .toLowerCase();
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
-        } else if (midWordSubstring < inputLetters) {
+        }
+        if (midWordSubstring < inputLetters) {
           low = midWordIndex + 1;
         } else if (midWordSubstring > inputLetters) {
           high = midWordIndex - 1;
@@ -93,7 +109,7 @@ const Form = () => {
 
     const filterLeftOptions = () => {
       let low = 0;
-      let high = midWord;
+      const high = midWord;
 
       while (low <= high) {
         const midWordIndex = Math.floor((low + high) / 2);
@@ -102,14 +118,15 @@ const Form = () => {
           .toLowerCase();
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
-        } else if (midWordSubstring < inputLetters) {
+        }
+        if (midWordSubstring < inputLetters) {
           low = midWordIndex + 1;
         }
       }
     };
 
     const filterRightOptions = () => {
-      let low = midWord;
+      const low = midWord;
       let high = options.length - 1;
 
       while (low <= high) {
@@ -119,7 +136,8 @@ const Form = () => {
           .toLowerCase();
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
-        } else if (midWordSubstring > inputLetters) {
+        }
+        if (midWordSubstring > inputLetters) {
           high = midWordIndex - 1;
         }
       }
@@ -144,6 +162,13 @@ const Form = () => {
           ({ value }) => value === copiedValue
         );
 
+        const filteredWords = filterWords(copiedValue);
+        const changeStatus = () => {
+          if (filteredWords.includes(copiedValue)) return 'filled';
+          if (filteredWords.length !== 0) return 'filling';
+          return 'focused';
+        };
+
         return {
           ...acc,
           [currentName]: {
@@ -151,13 +176,9 @@ const Form = () => {
             value: copiedValue,
             autocompleteOptions:
               copiedValueOptions.length === 0
-                ? filterWords(copiedValue)
+                ? filteredWords
                 : copiedValueOptions[0].autocompleteOptions,
-            status: filterWords(copiedValue).includes(copiedValue)
-              ? 'filled'
-              : filterWords(copiedValue).length !== 0
-              ? 'filling'
-              : 'focused',
+            status: changeStatus(),
           },
         };
       }, {});
@@ -166,10 +187,6 @@ const Form = () => {
       setInputs(copiedAndRestValues);
       setActiveField(nearstUnfilledField);
     });
-  };
-
-  const unfocusAllItems = () => {
-    setFormState('disable');
   };
 
   const changeHandler = (event) => {
@@ -213,7 +230,6 @@ const Form = () => {
           status: 'filled',
         },
       });
-      return;
     } else if (filteredHintsList.length !== 0) {
       setInputs({
         ...inputs,
@@ -224,7 +240,6 @@ const Form = () => {
           status: 'filling',
         },
       });
-      return;
     } else {
       setInputs({
         ...inputs,
@@ -244,16 +259,21 @@ const Form = () => {
 
     setInputs({
       ...inputs,
-      [id]: { ...inputs[id], value: option, autocompleteOptions: [], status: 'filled' },
+      [id]: {
+        ...inputs[id],
+        value: option,
+        autocompleteOptions: [],
+        status: 'filled',
+      },
     });
   };
 
-  const showOptions = (options, id) => {
-    optionRefs.current = options.map((_, i) => optionRefs.current[i] ?? createRef());
+  const showOptions = (inputOptions, id) => {
+    optionRefs.current = inputOptions.map((option, i) => optionRefs.current[i] ?? createRef());
 
     return (
       <div className="autocomplete-list">
-        {options.map((option, index) => (
+        {inputOptions.map((option, index) => (
           <div
             key={_.uniqueId()}
             className={classNames('autocomplete-item', { focused: index === 0 })}
@@ -267,10 +287,10 @@ const Form = () => {
     );
   };
 
-  const clickHandler = (event) => {
+  const clickHandler = async (event) => {
     event.preventDefault();
     const { target } = event;
-    const { name, value, textContent, dataset } = target;
+    const { name, textContent, dataset } = target;
 
     if (target.classList.contains('submit')) {
       setSubmitFormData(inputs);
@@ -334,21 +354,8 @@ const Form = () => {
     }
 
     if (target.classList.contains('autocomplete-input')) {
-      setFormState('updated');
       setActiveField(name);
-      if (value === '') {
-        setInputs({
-          ...inputs,
-          [target.name]: {
-            ...inputs[target.name],
-            autocompleteOptions: options,
-            value,
-            status: 'filling',
-          },
-        });
-        return;
-      }
-      return;
+      setFormState('updated');
     }
 
     if (!target.classList.contains('autocomplete-input')) {
@@ -356,9 +363,9 @@ const Form = () => {
     }
   };
 
-  //event is fired when a key is pressed
+  // event is fired when a key is pressed
   const keyDownHandler = (event) => {
-    const keyCode = event.keyCode;
+    const { keyCode } = event;
     const { target } = event;
     const { name } = target;
 
@@ -396,19 +403,10 @@ const Form = () => {
     }
   };
 
-  const submitForm = () => {
-    setInputs(fields);
-    setFormState('submitted');
-    setSubmitBtnDisable(true);
-    setActiveField('1');
-    setConfirmBtnDisable(true);
-    focusOption = 1;
-  };
-
   const makeField = () => {
     const inputsList = Object.entries(inputs);
 
-    fieldRefs.current = inputsList.map((_, i) => fieldRefs.current[i] ?? createRef());
+    fieldRefs.current = inputsList.map((field, i) => fieldRefs.current[i] ?? createRef());
 
     return inputsList.map(([, { id, autocompleteOptions, status, value }], i) => (
       <td key={_.uniqueId()}>
@@ -450,7 +448,7 @@ const Form = () => {
   };
 
   return (
-    <div className="wrapper" onClick={clickHandler}>
+    <div className="wrapper" onClick={clickHandler} role="presentation">
       <main id="page1" className="main">
         {formState === 'confirmed' ? (
           <ul id="success" className="animate-ul">
@@ -478,6 +476,7 @@ const Form = () => {
                   <td>
                     <button
                       id="copy__button"
+                      type="button"
                       className={classNames('confirm', { btn_out: formState === 'confirmed' })}
                       ref={confirmBtnRef}
                       disabled={confirmBtnDisable}
@@ -489,7 +488,7 @@ const Form = () => {
               ) : (
                 <tr className="row">
                   <td>
-                    <button id="copy__button" className="copy" ref={copyBtnRef}>
+                    <button type="button" id="copy__button" className="copy" ref={copyBtnRef}>
                       Copy
                     </button>
                   </td>
@@ -512,6 +511,6 @@ const Form = () => {
       </main>
     </div>
   );
-};
+}
 
 export default Form;
