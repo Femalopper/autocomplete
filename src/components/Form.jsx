@@ -107,42 +107,38 @@ function Form() {
 
     const midWord = filterOptions();
 
-    const filterLeftRightOptions = (l, h) => {
-      const midWordIndex = Math.floor((l + h) / 2);
-      const midWordSubstring = sortedOptions[midWordIndex]
-        .slice(0, inputLetters.length)
-        .toLowerCase();
-      return [midWordIndex, midWordSubstring];
-    };
-
-    const filterLeftOptions = () => {
-      let low = 0;
-      const high = midWord;
-
+    const filterLeftRightOptions = (l, h, feature) => {
+      let low = l;
+      let high = h;
       while (low <= high) {
-        const [midWordIndex, midWordSubstring] = filterLeftRightOptions(low, high);
+        const midWordIndex = Math.floor((low + high) / 2);
+        const midWordSubstring = sortedOptions[midWordIndex]
+          .slice(0, inputLetters.length)
+          .toLowerCase();
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
         }
-        if (midWordSubstring < inputLetters) {
+        if (feature === 'left' && midWordSubstring < inputLetters) {
           low = midWordIndex + 1;
         }
+        if (feature === 'right' && midWordSubstring > inputLetters) {
+          high = midWordIndex - 1;
+        }
       }
+    };
+
+    const filterLeftOptions = () => {
+      const low = 0;
+      const high = midWord;
+
+      return filterLeftRightOptions(low, high, 'left');
     };
 
     const filterRightOptions = () => {
       const low = midWord;
-      let high = options.length - 1;
+      const high = options.length - 1;
 
-      while (low <= high) {
-        const [midWordIndex, midWordSubstring] = filterLeftRightOptions(low, high);
-        if (midWordSubstring === inputLetters) {
-          return midWordIndex;
-        }
-        if (midWordSubstring > inputLetters) {
-          high = midWordIndex - 1;
-        }
-      }
+      return filterLeftRightOptions(low, high, 'right');
     };
 
     const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
@@ -275,7 +271,7 @@ function Form() {
     );
   };
 
-  const clickHandler = async (event) => {
+  const clickHandler = (event) => {
     event.preventDefault();
     const { target } = event;
     const { name, textContent, dataset } = target;
