@@ -361,7 +361,7 @@ function Form() {
     }
 
     if (!target.classList.contains('autocomplete-input')) {
-      return unfocusAllItems();
+      unfocusAllItems();
     }
   };
 
