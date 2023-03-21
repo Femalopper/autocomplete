@@ -107,15 +107,20 @@ function Form() {
 
     const midWord = filterOptions();
 
+    const filterLeftRightOptions = (l, h) => {
+      const midWordIndex = Math.floor((l + h) / 2);
+      const midWordSubstring = sortedOptions[midWordIndex]
+        .slice(0, inputLetters.length)
+        .toLowerCase();
+      return [midWordIndex, midWordSubstring];
+    };
+
     const filterLeftOptions = () => {
       let low = 0;
       const high = midWord;
 
       while (low <= high) {
-        const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex]
-          .slice(0, inputLetters.length)
-          .toLowerCase();
+        const [midWordIndex, midWordSubstring] = filterLeftRightOptions(low, high);
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
         }
@@ -130,10 +135,7 @@ function Form() {
       let high = options.length - 1;
 
       while (low <= high) {
-        const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex]
-          .slice(0, inputLetters.length)
-          .toLowerCase();
+        const [midWordIndex, midWordSubstring] = filterLeftRightOptions(low, high);
         if (midWordSubstring === inputLetters) {
           return midWordIndex;
         }
