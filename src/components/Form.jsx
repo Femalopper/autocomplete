@@ -218,41 +218,27 @@ function Form() {
 
     const filteredHintsList = filterWords(value);
 
+    let status;
+
     if (filteredHintsList.includes(inputLetters)) {
       const nearstUnfilledField = getNearestUnfilledField();
+      status = 'filled';
 
       setActiveField(nearstUnfilledField);
-
-      setInputs({
-        ...inputs,
-        [target.name]: {
-          ...inputs[target.name],
-          autocompleteOptions: filteredHintsList,
-          value,
-          status: 'filled',
-        },
-      });
     } else if (filteredHintsList.length !== 0) {
-      setInputs({
-        ...inputs,
-        [target.name]: {
-          ...inputs[target.name],
-          autocompleteOptions: filteredHintsList,
-          value,
-          status: 'filling',
-        },
-      });
+      status = 'filling';
     } else {
-      setInputs({
-        ...inputs,
-        [target.name]: {
-          ...inputs[target.name],
-          autocompleteOptions: [],
-          value,
-          status: 'focused',
-        },
-      });
+      status = 'focused';
     }
+    setInputs({
+      ...inputs,
+      [target.name]: {
+        ...inputs[target.name],
+        autocompleteOptions: filteredHintsList,
+        value,
+        status,
+      },
+    });
   };
 
   const selectItem = (option, id) => {
