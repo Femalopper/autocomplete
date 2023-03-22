@@ -44,23 +44,23 @@ const filterWords = (value) => {
       const nextSubstring = sortedOptions[midWordIndex + 1]
         .slice(0, inputLetters.length)
         .toLowerCase();
-      if (
+      const a =
         ((feature === 'left' && previousSubstring !== inputLetters) ||
           (nextSubstring !== inputLetters && feature === 'right')) &&
-        midWordSubstring === inputLetters
-      ) {
+        midWordSubstring === inputLetters;
+      const b =
+        (feature === 'left' && midWordSubstring === inputLetters) ||
+        (feature === 'right' && midWordSubstring > inputLetters);
+      const c =
+        (feature === 'right' && midWordSubstring === inputLetters) ||
+        (feature === 'left' && midWordSubstring < inputLetters);
+      if (a) {
         return midWordIndex;
       }
-      if (
-        (feature === 'left' && midWordSubstring === inputLetters) ||
-        (feature === 'right' && midWordSubstring > inputLetters)
-      ) {
+      if (b) {
         high = midWordIndex;
       }
-      if (
-        (feature === 'right' && midWordSubstring === inputLetters) ||
-        (feature === 'left' && midWordSubstring < inputLetters)
-      ) {
+      if (c) {
         low = midWordIndex;
       }
     }
@@ -97,6 +97,7 @@ const filterWords = (value) => {
 
     return filterLeftRightOptions(low, high, 'right');
   };
+
   const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
   return filteredHintsList;
 };
