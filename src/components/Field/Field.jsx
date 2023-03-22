@@ -4,6 +4,7 @@ import React, { useRef, createRef, forwardRef } from 'react';
 import _ from 'lodash';
 import classNames from 'classnames';
 import options from '../../data/words.json';
+import filterWords from './autocomplete';
 
 const Field = forwardRef((props, ref) => {
   const optionRefs = useRef([]);
@@ -21,70 +22,6 @@ const Field = forwardRef((props, ref) => {
   } = props;
   let focusOption = 1;
 
-  const filterWords = (value) => {
-    const sortedOptions = options.sort((a, b) => a.localeCompare(b));
-    const inputLetters = value.toLowerCase();
-    // filter the list of hints according to the pressed key
-    const filterOptions = () => {
-      let low = 0;
-      let high = sortedOptions.length - 1;
-
-      while (low <= high) {
-        const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex]
-          .slice(0, inputLetters.length)
-          .toLowerCase();
-        if (midWordSubstring === inputLetters) {
-          return midWordIndex;
-        }
-        if (midWordSubstring < inputLetters) {
-          low = midWordIndex + 1;
-        } else if (midWordSubstring > inputLetters) {
-          high = midWordIndex - 1;
-        }
-      }
-    };
-
-    const midWord = filterOptions();
-
-    const filterLeftRightOptions = (l, h, feature) => {
-      let low = l;
-      let high = h;
-      while (low <= high) {
-        const midWordIndex = Math.floor((low + high) / 2);
-        const midWordSubstring = sortedOptions[midWordIndex]
-          .slice(0, inputLetters.length)
-          .toLowerCase();
-        if (midWordSubstring === inputLetters) {
-          return midWordIndex;
-        }
-        if (feature === 'left' && midWordSubstring < inputLetters) {
-          low = midWordIndex + 1;
-        }
-        if (feature === 'right' && midWordSubstring > inputLetters) {
-          high = midWordIndex - 1;
-        }
-      }
-    };
-
-    const filterLeftOptions = () => {
-      const low = 0;
-      const high = midWord;
-
-      return filterLeftRightOptions(low, high, 'left');
-    };
-
-    const filterRightOptions = () => {
-      const low = midWord;
-      const high = options.length - 1;
-
-      return filterLeftRightOptions(low, high, 'right');
-    };
-
-    const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
-    return filteredHintsList;
-  };
-
   const keyDownHandler = (event) => {
     const { target, keyCode } = event;
     const { name } = target;
@@ -97,7 +34,11 @@ const Field = forwardRef((props, ref) => {
       });
     };
 
-    if ((keyCode === 40 || keyCode === 9) && optionRefs.current[0].current) {
+    if (
+      (keyCode === 40 || keyCode === 9) &&
+      optionRefs.current.length !== 0 &&
+      optionRefs.current[0].current
+    ) {
       // arrow down and tab
       event.preventDefault();
       optionRefs.current[focusOption - 1].current.classList.remove('focused');
@@ -170,13 +111,25 @@ const Field = forwardRef((props, ref) => {
     setFormState('updated');
     setActiveField(name);
 
-    const inputLetters = value.toLowerCase();
+    if (value === '') {
+      setInputs({
+        ...inputs,
+        [target.name]: {
+          ...inputs[target.name],
+          autocompleteOptions: options,
+          value,
+          status: 'filling',
+        },
+      });
+    }
+
+    if (value.trim() === '') return;
 
     const filteredHintsList = filterWords(value);
 
     let status;
 
-    if (filteredHintsList.includes(inputLetters)) {
+    if (filteredHintsList.includes(value)) {
       const nearstUnfilledField = getNearestUnfilledField();
       status = 'filled';
 
