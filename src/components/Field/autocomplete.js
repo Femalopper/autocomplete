@@ -20,7 +20,7 @@ const filterWords = (value) => {
       }
       if (midWordSubstring < inputLetters) {
         low = midWordIndex + 1;
-      } else if (midWordSubstring > inputLetters) {
+      } else {
         high = midWordIndex - 1;
       }
     }
