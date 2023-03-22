@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import './Form.css';
 import classNames from 'classnames';
 import Swal from 'sweetalert2';
+import _ from 'lodash';
 import fields from '../../data/fields.json';
 import Field from '../Field/Field';
 
@@ -90,15 +91,9 @@ function Form() {
   const clickHandler = (event) => {
     event.preventDefault();
     const { target } = event;
-    const { name, textContent, dataset } = target;
+    const { name, textContent, dataset, classList } = target;
 
-    if (target.classList.contains('submit')) {
-      setSubmitFormData(inputs);
-      submitForm();
-      return;
-    }
-
-    if (target.classList.contains('confirm')) {
+    const makeConfirmation = () => {
       const getInputValues = (data) => {
         const inputValues = Object.values(data).map(({ value }) => value);
         return inputValues.join('');
@@ -142,25 +137,32 @@ function Form() {
       const submitData = getInputValues(submitFormData);
       const confirmData = getInputValues(inputs);
       return submitData === confirmData ? setFormState('confirmed') : findWrongWords();
+    };
+
+    const classes = {
+      submit: () => {
+        setSubmitFormData(inputs);
+        submitForm();
+      },
+      confirm: () => makeConfirmation(),
+      'autocomplete-item': () => {
+        const inputId = dataset.input;
+        return selectItem(textContent, inputId);
+      },
+      copy: () => copy(),
+      'autocomplete-input': () => {
+        setActiveField(name);
+        setFormState('updated');
+      },
+    };
+
+    const classname = classList.value.split(' ')[0];
+
+    if (!_.has(classes, classname)) {
+      return unfocusAllItems();
     }
 
-    if (target.classList.contains('autocomplete-item')) {
-      const inputId = dataset.input;
-      return selectItem(textContent, inputId);
-    }
-
-    if (target.classList.contains('copy')) {
-      return copy();
-    }
-
-    if (target.classList.contains('autocomplete-input')) {
-      setActiveField(name);
-      setFormState('updated');
-    }
-
-    if (!target.classList.contains('autocomplete-input')) {
-      unfocusAllItems();
-    }
+    return classes[classname]();
   };
 
   return (
