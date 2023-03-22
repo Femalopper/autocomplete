@@ -39,11 +39,7 @@ function Form() {
     if (filledFealds.length === fieldRefs.current.length) {
       unfocusAllItems();
       setFormState('filled');
-      if (submitFormData === '') {
-        copyBtnRef.current.focus();
-      } else {
-        confirmBtnRef.current.focus();
-      }
+      return submitFormData === '' ? copyBtnRef.current.focus() : confirmBtnRef.current.focus();
     }
   }, [inputs, submitFormData, confirmBtnDisable]);
 
