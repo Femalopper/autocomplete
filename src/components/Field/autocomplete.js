@@ -27,8 +27,6 @@ const filterWords = (value) => {
 
   const midWord = filterOptions();
 
-  console.log(sortedOptions[midWord]);
-
   const filterLeftRightOptions = (l, h, feature) => {
     let low = l;
     let high = h;
@@ -95,7 +93,6 @@ const filterWords = (value) => {
   const filterRightOptions = () => {
     const low = midWord;
     const high = options.length - 1;
-    console.log(midWord);
 
     if (midWord >= options.length - 1 || !midWord) {
       return midWord;
@@ -107,9 +104,6 @@ const filterWords = (value) => {
 
     return filterLeftRightOptions(low, high, 'right');
   };
-
-  console.log(sortedOptions[filterLeftOptions()]);
-  console.log(sortedOptions[filterRightOptions()]);
 
   const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
   return filteredHintsList;
