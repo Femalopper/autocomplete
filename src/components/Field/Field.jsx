@@ -89,37 +89,34 @@ const Field = forwardRef((props, ref) => {
     const { target, keyCode } = event;
     const { name } = target;
 
+    const scrollOptions = () => {
+      optionRefs.current[focusOption - 1].current.classList.add('focused');
+      optionRefs.current[focusOption - 1].current.scrollIntoView({
+        block: 'center',
+        behavior: 'smooth',
+      });
+    };
+
     if ((keyCode === 40 || keyCode === 9) && optionRefs.current[0].current) {
       // arrow down and tab
       event.preventDefault();
       optionRefs.current[focusOption - 1].current.classList.remove('focused');
       focusOption = focusOption === optionRefs.current.length ? 1 : focusOption + 1;
-      optionRefs.current[focusOption - 1].current.classList.add('focused');
-      optionRefs.current[focusOption - 1].current.scrollIntoView({
-        block: 'center',
-        behavior: 'smooth',
-      });
+      scrollOptions();
     } else if (keyCode === 38 && inputs[name].status === 'filling') {
       // arrow up
       event.preventDefault();
       optionRefs.current[focusOption - 1].current.classList.remove('focused');
       focusOption = focusOption <= 1 ? optionRefs.current.length : focusOption - 1;
-      optionRefs.current[focusOption - 1].current.classList.add('focused');
-      optionRefs.current[focusOption - 1].current.scrollIntoView({
-        block: 'center',
-        behavior: 'smooth',
-      });
+      scrollOptions();
     } else if (keyCode === 27) {
       // escape
       event.preventDefault();
       unfocusAllItems();
-    } else if (keyCode === 13) {
+    } else if (keyCode === 13 && optionRefs.current.length !== 0 && optionRefs.current[0].current) {
       // enter
-      event.preventDefault();
-      if (optionRefs.current.length !== 0 && optionRefs.current[0].current) {
-        const currentOptionValue = optionRefs.current[focusOption - 1].current.textContent;
-        selectItem(currentOptionValue, name);
-      }
+      const currentOptionValue = optionRefs.current[focusOption - 1].current.textContent;
+      selectItem(currentOptionValue, name);
     }
   };
 
@@ -173,21 +170,6 @@ const Field = forwardRef((props, ref) => {
     setFormState('updated');
     setActiveField(name);
 
-    if (value === '') {
-      setInputs({
-        ...inputs,
-        [target.name]: {
-          ...inputs[target.name],
-          autocompleteOptions: options,
-          value,
-          status: 'filling',
-        },
-      });
-      return;
-    }
-
-    if (value.trim() === '') return;
-
     const inputLetters = value.toLowerCase();
 
     const filteredHintsList = filterWords(value);
@@ -204,6 +186,7 @@ const Field = forwardRef((props, ref) => {
     } else {
       status = 'focused';
     }
+
     setInputs({
       ...inputs,
       [target.name]: {
