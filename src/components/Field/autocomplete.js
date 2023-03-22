@@ -27,55 +27,20 @@ const filterWords = (value) => {
 
   const midWord = filterOptions();
 
-  const filterLeftRightOptions = (l, h, feature) => {
-    let low = l;
-    let high = h;
-    while (low <= high) {
-      const midWordIndex = Math.floor((low + high) / 2);
-      const midWordSubstring = sortedOptions[midWordIndex]
-        .slice(0, inputLetters.length)
-        .toLowerCase();
-      if (midWordIndex === 0 || midWordIndex >= options.length) {
-        return midWordIndex;
-      }
-      const previousSubstring = sortedOptions[midWordIndex - 1]
-        .slice(0, inputLetters.length)
-        .toLowerCase();
-      const nextSubstring = sortedOptions[midWordIndex + 1]
-        .slice(0, inputLetters.length)
-        .toLowerCase();
-      if (
-        midWordSubstring === inputLetters &&
-        feature === 'left' &&
-        previousSubstring !== inputLetters
-      ) {
-        return midWordIndex;
-      }
-      if (
-        midWordSubstring === inputLetters &&
-        feature === 'right' &&
-        nextSubstring !== inputLetters
-      ) {
-        return midWordIndex;
-      }
-      if (feature === 'left' && midWordSubstring === inputLetters) {
-        high = midWordIndex;
-      }
-      if (feature === 'right' && midWordSubstring === inputLetters) {
-        low = midWordIndex;
-      }
-      if (feature === 'left' && midWordSubstring < inputLetters) {
-        low = midWordIndex;
-      }
-      if (feature === 'right' && midWordSubstring > inputLetters) {
-        high = midWordIndex;
-      }
+  const filterLeftRightOptions = (low, high) => {
+    const midWordIndex = Math.floor((low + high) / 2);
+    const midWordSubstring = sortedOptions[midWordIndex]
+      .slice(0, inputLetters.length)
+      .toLowerCase();
+    if (midWordIndex === 0 || midWordIndex >= options.length) {
+      return midWordIndex;
     }
+    return [midWordIndex, midWordSubstring];
   };
 
   const filterLeftOptions = () => {
-    const low = 0;
-    const high = midWord;
+    let low = 0;
+    let high = midWord;
 
     if (midWord === 0 || !midWord) {
       return midWord;
@@ -87,12 +52,26 @@ const filterWords = (value) => {
 
     if (previousSubstring !== inputLetters) return midWord;
 
-    return filterLeftRightOptions(low, high, 'left');
+    while (low <= high) {
+      const [midWordIndex, midWordSubstring] = filterLeftRightOptions(low, high);
+
+      const previous = sortedOptions[midWordIndex - 1].slice(0, inputLetters.length).toLowerCase();
+
+      if (midWordSubstring === inputLetters && previous !== inputLetters) {
+        return midWordIndex;
+      }
+      if (midWordSubstring === inputLetters) {
+        high = midWordIndex;
+      }
+      if (midWordSubstring < inputLetters) {
+        low = midWordIndex;
+      }
+    }
   };
 
   const filterRightOptions = () => {
-    const low = midWord;
-    const high = options.length - 1;
+    let low = midWord;
+    let high = options.length - 1;
 
     if (midWord >= options.length - 1 || !midWord) {
       return midWord;
@@ -102,7 +81,21 @@ const filterWords = (value) => {
 
     if (nextSubstring !== inputLetters) return midWord;
 
-    return filterLeftRightOptions(low, high, 'right');
+    while (low <= high) {
+      const [midWordIndex, midWordSubstring] = filterLeftRightOptions(low, high);
+
+      const next = sortedOptions[midWordIndex + 1].slice(0, inputLetters.length).toLowerCase();
+
+      if (midWordSubstring === inputLetters && next !== inputLetters) {
+        return midWordIndex;
+      }
+      if (midWordSubstring === inputLetters) {
+        low = midWordIndex;
+      }
+      if (midWordSubstring > inputLetters) {
+        high = midWordIndex;
+      }
+    }
   };
 
   const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
