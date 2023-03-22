@@ -36,36 +36,27 @@ const Field = forwardRef((props, ref) => {
       });
     };
 
-    const keycodesBehavior = {
-      40: () => {
-        event.preventDefault();
-        optionRefs.current[focusOption - 1].current.classList.remove('focused');
-        focusOption = focusOption === optionRefs.current.length ? 1 : focusOption + 1;
-        scrollOptions();
-      },
-      9: () => {
-        event.preventDefault();
-        optionRefs.current[focusOption - 1].current.classList.remove('focused');
-        focusOption = focusOption === optionRefs.current.length ? 1 : focusOption + 1;
-        scrollOptions();
-      },
-      38: () => {
-        event.preventDefault();
-        optionRefs.current[focusOption - 1].current.classList.remove('focused');
-        focusOption = focusOption <= 1 ? optionRefs.current.length : focusOption - 1;
-        scrollOptions();
-      },
-      27: () => {
-        event.preventDefault();
-        unfocusAllItems();
-      },
-      13: () => {
-        const currentOptionValue = optionRefs.current[focusOption - 1].current.textContent;
-        selectItem(currentOptionValue, name);
-      },
-    };
-    if (keyCode === 27) keycodesBehavior[keyCode]();
-    else if (hasOptions) keycodesBehavior[keyCode]();
+    if ((keyCode === 40 || keyCode === 9) && hasOptions) {
+      // arrow down and tab
+      event.preventDefault();
+      optionRefs.current[focusOption - 1].current.classList.remove('focused');
+      focusOption = focusOption === optionRefs.current.length ? 1 : focusOption + 1;
+      scrollOptions();
+    } else if (keyCode === 38 && hasOptions) {
+      // arrow up
+      event.preventDefault();
+      optionRefs.current[focusOption - 1].current.classList.remove('focused');
+      focusOption = focusOption <= 1 ? optionRefs.current.length : focusOption - 1;
+      scrollOptions();
+    } else if (keyCode === 27) {
+      // escape
+      event.preventDefault();
+      unfocusAllItems();
+    } else if (keyCode === 13 && hasOptions) {
+      // enter
+      const currentOptionValue = optionRefs.current[focusOption - 1].current.textContent;
+      selectItem(currentOptionValue, name);
+    }
   };
 
   const pasteHandler = (event) => {
