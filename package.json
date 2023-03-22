@@ -12,6 +12,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "react-scroll-into-view": "^1.12.0",
     "react-use": "^17.4.0",
     "sweetalert": "^2.1.2",
     "sweetalert2": "^11.7.3",
