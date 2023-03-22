@@ -4,6 +4,7 @@ import options from '../../data/words.json';
 const filterWords = (value) => {
   const sortedOptions = options.sort((a, b) => a.localeCompare(b));
   const inputLetters = value.toLowerCase();
+
   // filter the list of hints according to the pressed key
   const filterOptions = () => {
     let low = 0;
@@ -56,11 +57,7 @@ const filterWords = (value) => {
         (feature === 'right' && midWordSubstring > inputLetters)
       ) {
         high = midWordIndex;
-      }
-      if (
-        (feature === 'right' && midWordSubstring === inputLetters) ||
-        (feature === 'left' && midWordSubstring < inputLetters)
-      ) {
+      } else {
         low = midWordIndex;
       }
     }
