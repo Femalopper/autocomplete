@@ -5,21 +5,16 @@ const filterWords = (value) => {
   const sortedOptions = options.sort((a, b) => a.localeCompare(b));
   const inputLetters = value.toLowerCase();
 
-  const leftRight = (low, high) => {
-    const midWordIndex = Math.floor((low + high) / 2);
-    const midWordSubstring = sortedOptions[midWordIndex]
-      .slice(0, inputLetters.length)
-      .toLowerCase();
-    return [midWordIndex, midWordSubstring];
-  };
-
   // filter the list of hints according to the pressed key
   const filterOptions = () => {
     let low = 0;
     let high = sortedOptions.length - 1;
 
     while (low <= high) {
-      const [midWordIndex, midWordSubstring] = leftRight(low, high);
+      const midWordIndex = Math.floor((low + high) / 2);
+      const midWordSubstring = sortedOptions[midWordIndex]
+        .slice(0, inputLetters.length)
+        .toLowerCase();
       if (midWordSubstring === inputLetters) {
         return midWordIndex;
       }
@@ -37,7 +32,10 @@ const filterWords = (value) => {
     let low = l;
     let high = h;
     while (low <= high) {
-      const [midWordIndex, midWordSubstring] = leftRight(low, high);
+      const midWordIndex = Math.floor((low + high) / 2);
+      const midWordSubstring = sortedOptions[midWordIndex]
+        .slice(0, inputLetters.length)
+        .toLowerCase();
       if (midWordIndex === 0 || midWordIndex >= options.length) {
         return midWordIndex;
       }
@@ -48,8 +46,7 @@ const filterWords = (value) => {
         .slice(0, inputLetters.length)
         .toLowerCase();
       if (
-        ((feature === 'left' && previousSubstring !== inputLetters) ||
-          (nextSubstring !== inputLetters && feature === 'right')) &&
+        (previousSubstring !== inputLetters || nextSubstring !== inputLetters) &&
         midWordSubstring === inputLetters
       ) {
         return midWordIndex;
