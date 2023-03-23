@@ -166,7 +166,7 @@ function Form() {
   };
 
   return (
-    <div className="wrapper" onClick={clickHandler} role="presentation">
+    <div className="wrapper">
       <main id="page1" className="main">
         {formState === 'confirmed' ? (
           <ul id="success" className="animate-ul">
@@ -185,7 +185,12 @@ function Form() {
               : 'Enter your seed phrase'}
           </h4>
         )}
-        <form className="input__wrap" ref={formRef}>
+        <form
+          ref={formRef}
+          className={classNames('input__wrap', { disabledbutton: formState === 'confirmed' })}
+          onClick={clickHandler}
+          role="presentation"
+        >
           <table>
             <tbody>
               <tr className="row">
