@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import Swal from 'sweetalert2';
 import _ from 'lodash';
 import fields from '../../data/fields.json';
+import options from '../../data/words.json';
 import Field from '../Field/Field';
 
 function Form() {
@@ -91,7 +92,7 @@ function Form() {
   const clickHandler = (event) => {
     event.preventDefault();
     const { target } = event;
-    const { name, textContent, dataset, classList } = target;
+    const { name, textContent, dataset, classList, value } = target;
 
     const makeConfirmation = () => {
       const getInputValues = (data) => {
@@ -149,6 +150,18 @@ function Form() {
       'autocomplete-input': () => {
         setActiveField(name);
         setFormState('updated');
+
+        if (value === '') {
+          setInputs({
+            ...inputs,
+            [target.name]: {
+              ...inputs[target.name],
+              autocompleteOptions: options,
+              value,
+              status: 'filling',
+            },
+          });
+        }
       },
     };
 
@@ -162,7 +175,11 @@ function Form() {
   };
 
   return (
-    <div className="wrapper">
+    <div
+      className={classNames('wrapper', { disabledbutton: formState === 'confirmed' })}
+      onClick={clickHandler}
+      role="presentation"
+    >
       <main id="page1" className="main">
         {formState === 'confirmed' ? (
           <ul id="success" className="animate-ul">
@@ -181,12 +198,7 @@ function Form() {
               : 'Enter your seed phrase'}
           </h4>
         )}
-        <form
-          ref={formRef}
-          className={classNames('input__wrap', { disabledbutton: formState === 'confirmed' })}
-          onClick={clickHandler}
-          role="presentation"
-        >
+        <form ref={formRef} className="input__wrap">
           <table>
             <tbody>
               <tr className="row">

@@ -22,4 +22,5 @@ rules: { 'react/react-in-jsx-scope': 'off', 'object-curly-newline': 'off', 'comm
     unnamedComponents: 'arrow-function',
   },
 ],
+'no-shadow': 'off',
 }
