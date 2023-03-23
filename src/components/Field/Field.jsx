@@ -67,6 +67,7 @@ const Field = forwardRef((props, ref) => {
     let currentName = +name - 1;
     navigator.clipboard.readText().then((clipText) => {
       const copiedValues = clipText.split(/[\s,]+/); // convert string to array, separating words with commas or any spaces;
+      if (copiedValues[0].trim() === '') return;
       const diff = fieldRefs.current.length - name;
       const fillRest = copiedValues.slice(0, diff + 1).reduce((acc, copiedValue) => {
         currentName += 1;

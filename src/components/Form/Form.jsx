@@ -118,11 +118,6 @@ function Form() {
           {}
         );
 
-        setInputs({
-          ...inputs,
-          ...wrongWordsObj,
-        });
-
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -130,6 +125,10 @@ function Form() {
           confirmButtonColor: 'rgba(127, 255, 212, 0.4)',
           didClose: () => {
             setActiveField(wrongWordsId[0]);
+            setInputs({
+              ...inputs,
+              ...wrongWordsObj,
+            });
           },
         });
       };
@@ -145,10 +144,7 @@ function Form() {
         submitForm();
       },
       confirm: () => makeConfirmation(),
-      'autocomplete-item': () => {
-        const inputId = dataset.input;
-        return selectItem(textContent, inputId);
-      },
+      'autocomplete-item': () => selectItem(textContent, dataset.input),
       copy: () => copy(),
       'autocomplete-input': () => {
         setActiveField(name);
