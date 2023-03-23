@@ -7,7 +7,7 @@ Demonstration of adaptive responsive submit form. The submit form represents the
 
 ---
 
-### Implemented features
+## Implemented features
 
 :heavy_check_mark: autocomplete technique
 
@@ -31,15 +31,12 @@ Demonstration of adaptive responsive submit form. The submit form represents the
 
 ### Autocomplete technique
 
-![Main functionality]
-(https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/autocomplete.gif)
+![Main functionality](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/autocomplete.gif)
 
 ### Form validation
 
-![Form Validation]
-(https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/validation.gif)
+![Form Validation](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/validation.gif)
 
 ### Copy-paste technique
 
-![Copy Paste]
-(https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/copy-paste.gif)
+![Copy Paste](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/copy-paste.gif)
