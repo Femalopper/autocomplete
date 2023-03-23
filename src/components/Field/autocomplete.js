@@ -4,6 +4,7 @@ import options from '../../data/words.json';
 const filterWords = (value) => {
   const sortedOptions = options.sort((a, b) => a.localeCompare(b));
   const inputLetters = value.toLowerCase();
+  console.log(sortedOptions);
 
   // filter the list of hints according to the pressed key
   const filterOptions = () => {
