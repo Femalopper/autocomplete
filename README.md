@@ -27,6 +27,35 @@ Demonstration of adaptive responsive submit form. The submit form represents the
    npm ci
 ```
 
+## Run app
+
+```sh
+   cd autocomplete
+
+   npm start
+```
+
+## Clipboard access allowed
+
+To access copy/paste:
+
+> Chrome
+
+![Chrome](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/Chrome.png)
+
+> Opera
+
+![Opera](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/Opera.png)
+
+> Firefox
+
+- Enter about:config in navigation bar
+- Click "Accept the Risk and Continue"
+- Search dom.events.testing.asyncClipboard and set true
+- Search dom.events.testing.asyncClipboard.readText and set true
+
+![Firefox](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/Opera.png)
+
 ---
 
 ### Autocomplete technique
