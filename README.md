@@ -54,7 +54,7 @@ To access copy/paste:
 - Search dom.events.testing.asyncClipboard and set true
 - Search dom.events.testing.asyncClipboard.readText and set true
 
-![Firefox](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/Opera.png)
+![Firefox](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/Firefox.png)
 
 ---
 
