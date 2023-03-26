@@ -6,7 +6,6 @@ import classNames from 'classnames';
 import Swal from 'sweetalert2';
 import _ from 'lodash';
 import fields from '../../data/fields.json';
-import options from '../../data/words.json';
 import Field from '../Field/Field';
 
 function Form() {
@@ -21,9 +20,13 @@ function Form() {
   const [confirmBtnDisable, setConfirmBtnDisable] = useState(true);
   const [activeField, setActiveField] = useState('1');
   const [submitFormData, setSubmitFormData] = useState('');
+  const [focusedOption, setFocusedOption] = useState(0);
+  const [coords, setCoords] = useState(0);
 
   const unfocusAllItems = () => {
     setFormState('disable');
+    setFocusedOption(0);
+    setCoords(0);
   };
 
   const submitForm = () => {
@@ -35,6 +38,10 @@ function Form() {
   };
 
   useEffect(() => {
+    if (coords !== 0) {
+      const list = document.querySelector('.autocomplete-list');
+      list.scrollTo(0, coords);
+    }
     const filledFealds = Object.values(inputs).filter(({ status }) => status === 'filled');
     setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
     setConfirmBtnDisable(filledFealds.length !== fieldRefs.current.length);
@@ -43,7 +50,7 @@ function Form() {
       setFormState('filled');
       return submitFormData === '' ? copyBtnRef.current.focus() : confirmBtnRef.current.focus();
     }
-  }, [inputs, submitFormData, confirmBtnDisable]);
+  }, [inputs, submitFormData, confirmBtnDisable, coords]);
 
   const getNearestUnfilledField = (inputFields = inputs) => {
     const nearstUnfilledField = Object.values(inputFields).filter(
@@ -56,6 +63,8 @@ function Form() {
 
   const selectItem = (option, id) => {
     const nearstUnfilledField = getNearestUnfilledField();
+    setFocusedOption(0);
+    setCoords(0);
     setActiveField(nearstUnfilledField);
 
     setInputs({
@@ -78,6 +87,8 @@ function Form() {
     }, []);
     navigator.clipboard.writeText(currentValues);
     copyBtnRef.current.innerHTML = 'Copied';
+    setFocusedOption(0);
+    setCoords(0);
     setTimeout(() => {
       copyBtnRef.current.innerHTML = 'Copy';
       const nearstUnfilledField = getNearestUnfilledField();
@@ -92,7 +103,7 @@ function Form() {
   const clickHandler = (event) => {
     event.preventDefault();
     const { target } = event;
-    const { name, textContent, dataset, classList, value } = target;
+    const { textContent, dataset, classList } = target;
 
     const makeConfirmation = () => {
       const getInputValues = (data) => {
@@ -147,22 +158,6 @@ function Form() {
       confirm: () => makeConfirmation(),
       'autocomplete-item': () => selectItem(textContent, dataset.input),
       copy: () => copy(),
-      'autocomplete-input': () => {
-        setActiveField(name);
-        setFormState('updated');
-
-        if (value === '') {
-          setInputs({
-            ...inputs,
-            [target.name]: {
-              ...inputs[target.name],
-              autocompleteOptions: options,
-              value,
-              status: 'filling',
-            },
-          });
-        }
-      },
     };
 
     const classname = classList.value.split(' ')[0];
@@ -213,6 +208,10 @@ function Form() {
                   inputs={inputs}
                   unfocusAllItems={unfocusAllItems}
                   ref={fieldRefs}
+                  coords={coords}
+                  focusedOption={focusedOption}
+                  setFocusedOption={setFocusedOption}
+                  setCoords={setCoords}
                 />
               </tr>
               {submitFormData !== '' ? (

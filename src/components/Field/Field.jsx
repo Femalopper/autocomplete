@@ -19,42 +19,48 @@ const Field = forwardRef((props, ref) => {
     setInputs,
     inputs,
     unfocusAllItems,
+    focusedOption,
+    setFocusedOption,
+    coords,
+    setCoords,
   } = props;
-  let focusOption = 1;
 
   const keyDownHandler = (event) => {
-    const { target, keyCode } = event;
+    const { target, keyCode, shiftKey } = event;
+    console.log(shiftKey);
     const { name } = target;
 
     const hasOptions = optionRefs.current.length !== 0 && optionRefs.current[0].current;
 
-    const scrollOptions = () => {
-      optionRefs.current[focusOption - 1].current.classList.add('focused');
-      optionRefs.current[focusOption - 1].current.scrollIntoView({
-        block: 'center',
-        behavior: 'smooth',
-      });
-    };
-
-    if ((keyCode === 40 || keyCode === 9) && hasOptions) {
+    if ((keyCode === 38 || (shiftKey && keyCode === 9)) && hasOptions) {
+      // arrow up and shift+tab
+      event.preventDefault();
+      const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
+      if (focusedOption === 0) {
+        setFocusedOption(optionRefs.current.length - 1);
+        setCoords(optionHeight * (optionRefs.current.length - 1));
+      } else {
+        setFocusedOption(focusedOption - 1);
+        setCoords(coords - optionHeight);
+      }
+    } else if ((keyCode === 40 || keyCode === 9) && hasOptions) {
       // arrow down and tab
       event.preventDefault();
-      optionRefs.current[focusOption - 1].current.classList.remove('focused');
-      focusOption = focusOption === optionRefs.current.length ? 1 : focusOption + 1;
-      scrollOptions();
-    } else if (keyCode === 38 && hasOptions) {
-      // arrow up
-      event.preventDefault();
-      optionRefs.current[focusOption - 1].current.classList.remove('focused');
-      focusOption = focusOption <= 1 ? optionRefs.current.length : focusOption - 1;
-      scrollOptions();
+      const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
+      if (focusedOption === optionRefs.current.length - 1) {
+        setFocusedOption(0);
+        setCoords(0);
+      } else {
+        setFocusedOption(focusedOption + 1);
+        setCoords(coords + optionHeight);
+      }
     } else if (keyCode === 27) {
       // escape
       event.preventDefault();
       unfocusAllItems();
     } else if (keyCode === 13 && hasOptions) {
       // enter
-      const currentOptionValue = optionRefs.current[focusOption - 1].current.textContent;
+      const currentOptionValue = optionRefs.current[focusedOption].current.textContent;
       selectItem(currentOptionValue, name);
     }
   };
@@ -105,10 +111,10 @@ const Field = forwardRef((props, ref) => {
   const changeHandler = (event) => {
     event.preventDefault();
     const { target } = event;
-    const { value, name } = target;
+    const { value } = target;
 
-    setFormState('updated');
-    setActiveField(name);
+    setFocusedOption(0);
+    setCoords(0);
 
     if (value === '') {
       setInputs({
@@ -158,7 +164,8 @@ const Field = forwardRef((props, ref) => {
         {inputOptions.map((option, index) => (
           <div
             key={_.uniqueId()}
-            className={classNames('autocomplete-item', { focused: index === 0 })}
+            id={`${index}`}
+            className={classNames('autocomplete-item', { focused: index === focusedOption })}
             ref={optionRefs.current[index]}
             data-input={id}
           >
@@ -169,8 +176,17 @@ const Field = forwardRef((props, ref) => {
     );
   };
 
-  const inputsList = Object.entries(inputs);
+  const focusHandler = (id) => () => {
+    if (id !== activeField) {
+      setCoords(0);
+      setFocusedOption(0);
+    }
+    if (formState === 'filled' || formState === 'confirmed') return setActiveField(id);
+    setFormState('updated');
+    setActiveField(id);
+  };
 
+  const inputsList = Object.entries(inputs);
   fieldRefs.current = inputsList.map((field, i) => fieldRefs.current[i] ?? createRef());
 
   return inputsList.map(([, { id, autocompleteOptions, status, value }], i) => (
@@ -184,7 +200,7 @@ const Field = forwardRef((props, ref) => {
         <div className="autocomplete-wrap">
           <input
             type="text"
-            id="autocomplete"
+            id={id}
             autoComplete="off"
             name={id}
             className={classNames('autocomplete-input', {
@@ -197,7 +213,9 @@ const Field = forwardRef((props, ref) => {
             onKeyDown={keyDownHandler}
             onChange={changeHandler}
             onPaste={pasteHandler}
-            autoFocus={activeField === id && formState !== 'disable'}
+            onClick={(e) => e.stopPropagation()}
+            onFocus={focusHandler(id)}
+            autoFocus={activeField === id && formState !== 'disable' && formState !== 'confirmed'}
           />
           {activeField === id &&
           status === 'filling' &&
