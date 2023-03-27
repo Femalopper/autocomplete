@@ -64,26 +64,11 @@ To access copy/paste:
 
 ### Form validation
 
-<table>
-  <tbody>
-    <tr>
-      <th>Field</th>
-      <th>Description</th>
-    </tr>
-    <tr>
-      <td><span style="background:linear-gradient(to top, #b0e2a7 0%, rgba(187, 245, 224) 36%, white 100%)"></span></td>
-      <td>Filled field</td>
-    </tr>
-    <tr>
-      <td style="background:linear-gradient(to top, rgb(214, 90, 90) 0%, rgb(223, 86, 86) 36%, white 100%)"></td>
-      <td>Incorrect field</td>
-    </tr>
-    <tr>
-      <td style="background:linear-gradient(to top, rgb(131, 123, 183) 0%, rgb(140, 147, 241) 36%, white 100%)"></td>
-      <td>Changed incorrect field</td>
-    </tr>
-  </tbody>
-</table>
+| Field                                                       | Description             |
+| :---------------------------------------------------------- | :---------------------- |
+| - ![#b0e2a7] (https://placehold.co/60x15/b0e2a7/b0e2a7.png) | Filled field            |
+| - ![#df5656] (https://placehold.co/60x15/df5656/df5656.png) | Incorrect field         |
+| - ![#8c93f1] (https://placehold.co/60x15/8c93f1/8c93f1.png) | Changed incorrect field |
 
 ![Form Validation](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/validation.gif)
 
