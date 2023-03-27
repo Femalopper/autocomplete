@@ -71,7 +71,7 @@ To access copy/paste:
       <th>Description</th>
     </tr>
     <tr>
-      <td style="background:green"></td>
+      <td><span style="background:linear-gradient(to top, #b0e2a7 0%, rgba(187, 245, 224) 36%, white 100%)"></span></td>
       <td>Filled field</td>
     </tr>
     <tr>
