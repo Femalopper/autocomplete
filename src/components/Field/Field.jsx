@@ -81,7 +81,7 @@ const Field = forwardRef((props, ref) => {
           ({ value }) => value === copiedValue
         );
 
-        const filteredWords = filterWords(copiedValue);
+        const filteredWords = filterWords(copiedValue, options);
         const changeStatus = () => {
           if (
             formState === 'unconfirmed' &&
@@ -140,7 +140,7 @@ const Field = forwardRef((props, ref) => {
 
     if (value.trim() === '') return;
 
-    const filteredHintsList = filterWords(value);
+    const filteredHintsList = filterWords(value, options);
     const nearstUnfilledField = getNearestUnfilledField();
 
     let status;
@@ -225,7 +225,6 @@ const Field = forwardRef((props, ref) => {
             id={id}
             autoComplete="off"
             name={id}
-            tabIndex={id}
             className={classNames('autocomplete-input', {
               filled: status === 'filled',
               unconfirmed__filled__input: status === 'unconfirmed filled',

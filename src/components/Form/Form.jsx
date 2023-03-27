@@ -1,11 +1,12 @@
 /* eslint consistent-return: off */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import './Form.css';
 import classNames from 'classnames';
 import Swal from 'sweetalert2';
 import _ from 'lodash';
 import fields from '../../data/fields.json';
+import options from '../../data/words.json';
 import Field from '../Field/Field';
 
 function Form() {
@@ -42,8 +43,14 @@ function Form() {
     setConfirmBtnDisable(true);
   };
 
-  useEffect(() => {
-    setFormState('firstLoad');
+  useLayoutEffect(() => {
+    const autocompleteOptions = options.sort((a, b) => a.localeCompare(b));
+
+    const sortedOptions = Object.entries(inputs).map(([key, value]) => [
+      key,
+      { ...value, autocompleteOptions },
+    ]);
+    setInputs(Object.fromEntries(sortedOptions));
   }, []);
 
   useEffect(() => {

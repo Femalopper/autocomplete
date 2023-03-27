@@ -1,20 +1,16 @@
 /* eslint consistent-return: off */
-import options from '../../data/words.json';
 
-const filterWords = (value) => {
-  const sortedOptions = options.sort((a, b) => a.localeCompare(b));
+const filterWords = (value, options) => {
   const inputLetters = value.toLowerCase();
 
   // filter the list of hints according to the pressed key
   const filterOptions = () => {
     let low = 0;
-    let high = sortedOptions.length - 1;
+    let high = options.length - 1;
 
     while (low <= high) {
       const midWordIndex = Math.floor((low + high) / 2);
-      const midWordSubstring = sortedOptions[midWordIndex]
-        .slice(0, inputLetters.length)
-        .toLowerCase();
+      const midWordSubstring = options[midWordIndex].slice(0, inputLetters.length).toLowerCase();
       if (midWordSubstring === inputLetters) {
         return midWordIndex;
       }
@@ -33,18 +29,14 @@ const filterWords = (value) => {
     let high = h;
     while (low <= high) {
       const midWordIndex = Math.floor((low + high) / 2);
-      const midWordSubstring = sortedOptions[midWordIndex]
-        .slice(0, inputLetters.length)
-        .toLowerCase();
+      const midWordSubstring = options[midWordIndex].slice(0, inputLetters.length).toLowerCase();
       if (midWordIndex === 0 || midWordIndex >= options.length) {
         return midWordIndex;
       }
-      const previousSubstring = sortedOptions[midWordIndex - 1]
+      const previousSubstring = options[midWordIndex - 1]
         .slice(0, inputLetters.length)
         .toLowerCase();
-      const nextSubstring = sortedOptions[midWordIndex + 1]
-        .slice(0, inputLetters.length)
-        .toLowerCase();
+      const nextSubstring = options[midWordIndex + 1].slice(0, inputLetters.length).toLowerCase();
       if (
         (previousSubstring !== inputLetters || nextSubstring !== inputLetters) &&
         midWordSubstring === inputLetters
@@ -70,9 +62,7 @@ const filterWords = (value) => {
       return midWord;
     }
 
-    const previousSubstring = sortedOptions[midWord - 1]
-      .slice(0, inputLetters.length)
-      .toLowerCase();
+    const previousSubstring = options[midWord - 1].slice(0, inputLetters.length).toLowerCase();
 
     if (previousSubstring !== inputLetters) return midWord;
     return filterLeftRightOptions(low, high, 'left');
@@ -86,13 +76,13 @@ const filterWords = (value) => {
       return midWord;
     }
 
-    const nextSubstring = sortedOptions[midWord + 1].slice(0, inputLetters.length).toLowerCase();
+    const nextSubstring = options[midWord + 1].slice(0, inputLetters.length).toLowerCase();
     if (nextSubstring !== inputLetters) return midWord;
 
     return filterLeftRightOptions(low, high, 'right');
   };
 
-  const filteredHintsList = sortedOptions.slice(filterLeftOptions(), filterRightOptions() + 1);
+  const filteredHintsList = options.slice(filterLeftOptions(), filterRightOptions() + 1);
   return filteredHintsList;
 };
 
