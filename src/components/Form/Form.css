@@ -253,6 +253,39 @@ input:focus {
   animation-delay: 1.12s;
 }
 
+.wrong__word {
+  border: 2px solid rgb(158, 19, 19);
+  color: rgb(96, 14, 14);
+}
+
+.wrong__word__input {
+  background: linear-gradient(to top, rgb(214, 90, 90) 0%, rgb(223, 86, 86) 36%, white 100%);
+  color: rgb(82, 9, 9);
+  border-left: 1px solid rgb(158, 19, 19);
+}
+
+.unconfirmed__filled {
+  border: 2px solid rgb(24, 13, 86);
+  color: rgb(26, 14, 96);
+}
+
+.unconfirmed__filled__input {
+  background: linear-gradient(to top, rgb(131, 123, 183) 0%, rgb(140, 147, 241) 36%, white 100%);
+  color: rgb(26, 14, 96);
+  border-left: 1px solid rgb(37, 20, 132);
+}
+
+.input__out {
+  background: linear-gradient(to top, #b0e2a7 0%, rgba(187, 245, 224) 36%, white 100%);
+  color: rgb(60, 55, 55);
+  opacity: 0.5;
+  border-left: none;
+}
+
+.input__out__confirmed {
+  border: none;
+}
+
 @-webkit-keyframes ani {
   0% {
     color: rgba(134, 224, 227, 0.766);
@@ -350,37 +383,4 @@ input:focus {
   .animate-ul li {
     font-size: 2em;
   }
-}
-
-.wrong__word {
-  border: 2px solid rgb(158, 19, 19);
-  color: rgb(96, 14, 14);
-}
-
-.wrong__word__input {
-  background: linear-gradient(to top, rgb(214, 90, 90) 0%, rgb(223, 86, 86) 36%, white 100%);
-  color: rgb(82, 9, 9);
-  border-left: 1px solid rgb(158, 19, 19);
-}
-
-.unconfirmed__filled {
-  border: 2px solid rgb(24, 13, 86);
-  color: rgb(26, 14, 96);
-}
-
-.unconfirmed__filled__input {
-  background: linear-gradient(to top, rgb(131, 123, 183) 0%, rgb(140, 147, 241) 36%, white 100%);
-  color: rgb(26, 14, 96);
-  border-left: 1px solid rgb(37, 20, 132);
-}
-
-.input__out {
-  background: linear-gradient(to top, #b0e2a7 0%, rgba(187, 245, 224) 36%, white 100%);
-  color: rgb(60, 55, 55);
-  opacity: 0.5;
-  border-left: none;
-}
-
-.input__out__confirmed {
-  border: none;
 }
