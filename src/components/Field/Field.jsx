@@ -23,17 +23,17 @@ const Field = forwardRef((props, ref) => {
     setFocusedOption,
     coords,
     setCoords,
+    wrongWords,
   } = props;
 
   const keyDownHandler = (event) => {
-    const { target, keyCode, shiftKey } = event;
-    console.log(shiftKey);
+    const { target, keyCode } = event;
     const { name } = target;
 
     const hasOptions = optionRefs.current.length !== 0 && optionRefs.current[0].current;
 
-    if ((keyCode === 38 || (shiftKey && keyCode === 9)) && hasOptions) {
-      // arrow up and shift+tab
+    if (keyCode === 38 && hasOptions) {
+      // arrow up
       event.preventDefault();
       const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
       if (focusedOption === 0) {
@@ -43,8 +43,8 @@ const Field = forwardRef((props, ref) => {
         setFocusedOption(focusedOption - 1);
         setCoords(coords - optionHeight);
       }
-    } else if ((keyCode === 40 || keyCode === 9) && hasOptions) {
-      // arrow down and tab
+    } else if (keyCode === 40 && hasOptions) {
+      // arrow down
       event.preventDefault();
       const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
       if (focusedOption === optionRefs.current.length - 1) {
@@ -62,12 +62,12 @@ const Field = forwardRef((props, ref) => {
       // enter
       const currentOptionValue = optionRefs.current[focusedOption].current.textContent;
       selectItem(currentOptionValue, name);
+      event.preventDefault();
     }
   };
 
   const pasteHandler = (event) => {
     event.preventDefault();
-    setFormState('updated');
     const { target } = event;
     const { name } = target;
     let currentName = +name - 1;
@@ -83,6 +83,16 @@ const Field = forwardRef((props, ref) => {
 
         const filteredWords = filterWords(copiedValue);
         const changeStatus = () => {
+          if (
+            formState === 'unconfirmed' &&
+            _.has(wrongWords, currentName) &&
+            wrongWords[currentName] === copiedValue
+          ) {
+            return 'unconfirmed word';
+          }
+          if (formState === 'unconfirmed' && filteredWords.includes(copiedValue)) {
+            return 'unconfirmed filled';
+          }
           if (filteredWords.includes(copiedValue)) return 'filled';
           if (filteredWords.length !== 0) return 'filling';
           return 'focused';
@@ -111,7 +121,7 @@ const Field = forwardRef((props, ref) => {
   const changeHandler = (event) => {
     event.preventDefault();
     const { target } = event;
-    const { value } = target;
+    const { value, name } = target;
 
     setFocusedOption(0);
     setCoords(0);
@@ -131,13 +141,18 @@ const Field = forwardRef((props, ref) => {
     if (value.trim() === '') return;
 
     const filteredHintsList = filterWords(value);
+    const nearstUnfilledField = getNearestUnfilledField();
 
     let status;
 
-    if (filteredHintsList.includes(value)) {
-      const nearstUnfilledField = getNearestUnfilledField();
+    if (_.has(wrongWords, name) && wrongWords[name] === value) {
+      status = 'unconfirmed word';
+      setActiveField(nearstUnfilledField);
+    } else if (formState === 'unconfirmed' && filteredHintsList.includes(value)) {
+      status = 'unconfirmed filled';
+      setActiveField(nearstUnfilledField);
+    } else if (formState !== 'unconfirmed' && filteredHintsList.includes(value)) {
       status = 'filled';
-
       setActiveField(nearstUnfilledField);
     } else if (filteredHintsList.length !== 0) {
       status = 'filling';
@@ -181,9 +196,14 @@ const Field = forwardRef((props, ref) => {
       setCoords(0);
       setFocusedOption(0);
     }
-    if (formState === 'filled' || formState === 'confirmed') return setActiveField(id);
-    setFormState('updated');
     setActiveField(id);
+    if (formState === 'filled' || formState === 'confirmed' || formState === 'unconfirmed') {
+      return;
+    }
+    if (formState === 'disable unconfirmed') {
+      return setFormState('unconfirmed');
+    }
+    setFormState('updated');
   };
 
   const inputsList = Object.entries(inputs);
@@ -194,6 +214,8 @@ const Field = forwardRef((props, ref) => {
       <div
         className={classNames('input__field', {
           wrong__word: status === 'unconfirmed word',
+          unconfirmed__filled: status === 'unconfirmed filled',
+          input__out__confirmed: formState === 'confirmed',
         })}
       >
         <span className="number">{id}</span>
@@ -205,6 +227,7 @@ const Field = forwardRef((props, ref) => {
             name={id}
             className={classNames('autocomplete-input', {
               filled: status === 'filled',
+              unconfirmed__filled__input: status === 'unconfirmed filled',
               input__out: formState === 'confirmed',
               wrong__word__input: status === 'unconfirmed word',
             })}
@@ -215,12 +238,17 @@ const Field = forwardRef((props, ref) => {
             onPaste={pasteHandler}
             onClick={(e) => e.stopPropagation()}
             onFocus={focusHandler(id)}
-            autoFocus={activeField === id && formState !== 'disable' && formState !== 'confirmed'}
+            autoFocus={
+              activeField === id &&
+              formState !== 'disable' &&
+              formState !== 'confirmed' &&
+              formState !== 'disable unconfirmed'
+            }
           />
           {activeField === id &&
           status === 'filling' &&
-          formState !== 'firstLoad' &&
-          formState !== 'disable'
+          formState !== 'disable' &&
+          formState !== 'disable unconfirmed'
             ? showOptions(autocompleteOptions, id)
             : null}
         </div>

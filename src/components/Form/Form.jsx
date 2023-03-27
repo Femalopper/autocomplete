@@ -15,16 +15,21 @@ function Form() {
   const submitBtnRef = useRef();
   const confirmBtnRef = useRef();
   const [inputs, setInputs] = useState(fields);
-  const [formState, setFormState] = useState('firstLoad');
+  const [formState, setFormState] = useState('');
   const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
   const [confirmBtnDisable, setConfirmBtnDisable] = useState(true);
   const [activeField, setActiveField] = useState('1');
   const [submitFormData, setSubmitFormData] = useState('');
   const [focusedOption, setFocusedOption] = useState(0);
   const [coords, setCoords] = useState(0);
+  const [wrongWords, setWrongWords] = useState({});
 
   const unfocusAllItems = () => {
-    setFormState('disable');
+    if (formState === 'unconfirmed') {
+      setFormState('disable unconfirmed');
+    } else {
+      setFormState('disable');
+    }
     setFocusedOption(0);
     setCoords(0);
   };
@@ -38,23 +43,32 @@ function Form() {
   };
 
   useEffect(() => {
+    setFormState('firstLoad');
+  }, []);
+
+  useEffect(() => {
+    console.log(formState);
     if (coords !== 0) {
       const list = document.querySelector('.autocomplete-list');
       list.scrollTo(0, coords);
     }
-    const filledFealds = Object.values(inputs).filter(({ status }) => status === 'filled');
+    const filledFealds = Object.values(inputs).filter(
+      ({ status }) => status === 'filled' || status === 'unconfirmed filled'
+    );
     setSubmitBtnDisable(filledFealds.length !== fieldRefs.current.length);
     setConfirmBtnDisable(filledFealds.length !== fieldRefs.current.length);
     if (filledFealds.length === fieldRefs.current.length) {
       unfocusAllItems();
-      setFormState('filled');
+      if (formState === 'unconfirmed') setFormState('unconfirmed');
+      else setFormState('filled');
       return submitFormData === '' ? copyBtnRef.current.focus() : confirmBtnRef.current.focus();
     }
   }, [inputs, submitFormData, confirmBtnDisable, coords]);
 
   const getNearestUnfilledField = (inputFields = inputs) => {
     const nearstUnfilledField = Object.values(inputFields).filter(
-      ({ status, id }) => status !== 'filled' && id !== activeField
+      ({ status, id }) =>
+        status !== 'filled' && status !== 'unconfirmed filled' && id !== activeField
     );
     if (nearstUnfilledField.length === 0) return;
     const [first] = nearstUnfilledField;
@@ -67,13 +81,23 @@ function Form() {
     setCoords(0);
     setActiveField(nearstUnfilledField);
 
+    let status;
+
+    if (_.has(wrongWords, id) && wrongWords[id] === option) {
+      status = 'unconfirmed word';
+    } else if (formState === 'unconfirmed') {
+      status = 'unconfirmed filled';
+    } else if (formState !== 'unconfirmed') {
+      status = 'filled';
+    }
+
     setInputs({
       ...inputs,
       [id]: {
         ...inputs[id],
         value: option,
         autocompleteOptions: [],
-        status: 'filled',
+        status,
       },
     });
   };
@@ -112,15 +136,32 @@ function Form() {
       };
 
       const findWrongWords = () => {
+        setFormState('unconfirmed');
         const wrongWordsId = [];
+        let wrongW = {};
 
         let id = 1;
         while (id <= fieldRefs.current.length) {
           if (submitFormData[`${id}`].value !== inputs[`${id}`].value) {
             wrongWordsId.push(`${id}`);
+            wrongW = { ...wrongW, [id]: inputs[`${id}`].value };
           }
           id += 1;
         }
+        setWrongWords(wrongW);
+
+        const findCorrectWords = () => {
+          const wordsIds = Object.keys(inputs);
+          return _.xor(wrongWordsId, wordsIds);
+        };
+
+        const correctWordsObj = findCorrectWords().reduce(
+          (acc, correctWordId) => ({
+            ...acc,
+            [correctWordId]: { ...inputs[correctWordId], status: 'filled' },
+          }),
+          {}
+        );
 
         const wrongWordsObj = wrongWordsId.reduce(
           (acc, wrongWordId) => ({
@@ -134,11 +175,11 @@ function Form() {
           icon: 'error',
           title: 'Oops...',
           text: 'Mistake! Try again!',
-          confirmButtonColor: 'rgba(127, 255, 212, 0.4)',
+          confirmButtonColor: 'rgba(127, 255, 212, 0.6)',
           didClose: () => {
             setActiveField(wrongWordsId[0]);
             setInputs({
-              ...inputs,
+              ...correctWordsObj,
               ...wrongWordsObj,
             });
           },
@@ -212,6 +253,9 @@ function Form() {
                   focusedOption={focusedOption}
                   setFocusedOption={setFocusedOption}
                   setCoords={setCoords}
+                  submitData={submitFormData}
+                  wrongWords={wrongWords}
+                  setWrongWords={setWrongWords}
                 />
               </tr>
               {submitFormData !== '' ? (
