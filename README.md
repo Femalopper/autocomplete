@@ -66,7 +66,7 @@ To access copy/paste:
 
 | Field                                                    | Description             |
 | :------------------------------------------------------- | :---------------------- |
-| (https://placehold.co/60x15/b0e2a7/b0e2a7.png) `#b0e2a7` | Filled field            |
+| https://placehold.co/60x15/b0e2a7/b0e2a7.png             | Filled field            |
 | (https://placehold.co/60x15/df5656/df5656.png) `#df5656` | Incorrect field         |
 | (https://placehold.co/60x15/8c93f1/8c93f1.png) `#8c93f1` | Changed incorrect field |
 
