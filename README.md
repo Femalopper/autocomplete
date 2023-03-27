@@ -66,10 +66,10 @@ To access copy/paste:
 
 <table>
   <tbody>
-    <th>
-      <td>Field</td>
-      <td>Description</td>
-    </th>
+    <tr>
+      <th>Field</th>
+      <th>Description</th>
+    </tr>
     <tr>
       <td style="background:linear-gradient(to top, rgb(214, 90, 90) 0%, rgb(223, 86, 86) 36%, white 100%)"></td>
       <td>Filled field</td>
