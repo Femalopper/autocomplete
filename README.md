@@ -71,7 +71,7 @@ To access copy/paste:
       <th>Description</th>
     </tr>
     <tr>
-      <td><img src="https://placehold.co/60x15/b0e2a7/b0e2a7.png" style="width:100%" alt="" /></td>
+      <td style="background:https://placehold.co/60x15/b0e2a7/b0e2a7.png"></td>
       <td>Filled field</td>
     </tr>
     <tr>
