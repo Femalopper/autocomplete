@@ -64,6 +64,27 @@ To access copy/paste:
 
 ### Form validation
 
+<table>
+  <tbody>
+    <th>
+      <td>Field</td>
+      <td>Description</td>
+    </th>
+    <tr>
+      <td style="background:linear-gradient(to top, rgb(214, 90, 90) 0%, rgb(223, 86, 86) 36%, white 100%)"></td>
+      <td>Filled field</td>
+    </tr>
+    <tr>
+      <td style="background:linear-gradient(to top, rgb(214, 90, 90) 0%, rgb(223, 86, 86) 36%, white 100%)"></td>
+      <td>Incorrect field</td>
+    </tr>
+    <tr>
+      <td style="background:linear-gradient(to top, rgb(131, 123, 183) 0%, rgb(140, 147, 241) 36%, white 100%)"></td>
+      <td>Changed incorrect field</td>
+    </tr>
+  </tbody>
+</table>
+
 ![Form Validation](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/validation.gif)
 
 ### Copy-paste technique
