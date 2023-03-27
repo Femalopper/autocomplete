@@ -71,15 +71,15 @@ To access copy/paste:
       <th>Description</th>
     </tr>
     <tr>
-      <td><img src="https://placehold.co/60x15/b0e2a7/b0e2a7.png" alt="" /></td>
+      <td><img src="https://placehold.co/60x15/b0e2a7/b0e2a7.png" style="width:100%" alt="" /></td>
       <td>Filled field</td>
     </tr>
     <tr>
-      <td><img src="https://placehold.co/60x15/df5656/df5656.png" alt="" /></td>
+      <td><img src="https://placehold.co/60x15/df5656/df5656.png" style="width:100%" alt="" /></td>
       <td>Incorrect field</td>
     </tr>
     <tr>
-      <td><img src="https://placehold.co/60x15/8c93f1/8c93f1.png" alt="" /></td>
+      <td><img src="https://placehold.co/60x15/8c93f1/8c93f1.png" style="width:100%" alt="" /></td>
       <td>Changed incorrect field</td>
     </tr>
   </tbody>
