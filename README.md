@@ -64,11 +64,26 @@ To access copy/paste:
 
 ### Form validation
 
-| Field                                                    | Description             |
-| :------------------------------------------------------- | :---------------------- |
-| https://placehold.co/60x15/b0e2a7/b0e2a7.png             | Filled field            |
-| (https://placehold.co/60x15/df5656/df5656.png) `#df5656` | Incorrect field         |
-| (https://placehold.co/60x15/8c93f1/8c93f1.png) `#8c93f1` | Changed incorrect field |
+<table>
+  <tbody>
+    <tr>
+      <th>Field</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td><img src="https://placehold.co/60x15/b0e2a7/b0e2a7.png" alt="" /></td>
+      <td>Filled field</td>
+    </tr>
+    <tr>
+      <td><img src="https://placehold.co/60x15/df5656/df5656.png" alt="" /></td>
+      <td>Incorrect field</td>
+    </tr>
+    <tr>
+      <td><img src="https://placehold.co/60x15/8c93f1/8c93f1.png" alt="" /></td>
+      <td>Changed incorrect field</td>
+    </tr>
+  </tbody>
+</table>
 
 ![Form Validation](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/validation.gif)
 
