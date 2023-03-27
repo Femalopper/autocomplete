@@ -64,7 +64,7 @@ To access copy/paste:
 
 ### Form validation
 
-![Colors](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/Colors.png)
+![Colors](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/colors-img.png)
 
 ![Form Validation](https://github.com/Femalopper/raw/blob/main/images/react-app-autocomplete/validation.gif)
 
