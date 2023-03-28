@@ -114,7 +114,10 @@ const Field = forwardRef((props, ref) => {
       const copiedAndRestValues = { ...inputs, ...fillRest };
       const nearstUnfilledField = getNearestUnfilledField(copiedAndRestValues);
       setInputs(copiedAndRestValues);
-      setActiveField(nearstUnfilledField);
+      if (nearstUnfilledField) {
+        fieldRefs.current[nearstUnfilledField - 1].current.focus();
+        setActiveField(nearstUnfilledField);
+      }
     });
   };
 
@@ -147,13 +150,22 @@ const Field = forwardRef((props, ref) => {
 
     if (_.has(wrongWords, name) && wrongWords[name] === value) {
       status = 'unconfirmed word';
-      setActiveField(nearstUnfilledField);
+      if (nearstUnfilledField) {
+        fieldRefs.current[nearstUnfilledField - 1].current.focus();
+        setActiveField(nearstUnfilledField);
+      }
     } else if (formState === 'unconfirmed' && filteredHintsList.includes(value)) {
       status = 'unconfirmed filled';
-      setActiveField(nearstUnfilledField);
+      if (nearstUnfilledField) {
+        fieldRefs.current[nearstUnfilledField - 1].current.focus();
+        setActiveField(nearstUnfilledField);
+      }
     } else if (formState !== 'unconfirmed' && filteredHintsList.includes(value)) {
       status = 'filled';
-      setActiveField(nearstUnfilledField);
+      if (nearstUnfilledField) {
+        fieldRefs.current[nearstUnfilledField - 1].current.focus();
+        setActiveField(nearstUnfilledField);
+      }
     } else if (filteredHintsList.length !== 0) {
       status = 'filling';
     } else {
@@ -178,7 +190,7 @@ const Field = forwardRef((props, ref) => {
       <div className="autocomplete-list">
         {inputOptions.map((option, index) => (
           <div
-            key={_.uniqueId()}
+            key={option}
             id={`${index}`}
             className={classNames('autocomplete-item', { focused: index === focusedOption })}
             ref={optionRefs.current[index]}
@@ -210,7 +222,7 @@ const Field = forwardRef((props, ref) => {
   fieldRefs.current = inputsList.map((field, i) => fieldRefs.current[i] ?? createRef());
 
   return inputsList.map(([, { id, autocompleteOptions, status, value }], i) => (
-    <td key={_.uniqueId()}>
+    <td key={id}>
       <div
         className={classNames('input__field', {
           wrong__word: status === 'unconfirmed word',
@@ -238,12 +250,6 @@ const Field = forwardRef((props, ref) => {
             onPaste={pasteHandler}
             onClick={(e) => e.stopPropagation()}
             onFocus={focusHandler(id)}
-            autoFocus={
-              activeField === id &&
-              formState !== 'disable' &&
-              formState !== 'confirmed' &&
-              formState !== 'disable unconfirmed'
-            }
           />
           {activeField === id &&
           status === 'filling' &&

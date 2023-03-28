@@ -6,13 +6,14 @@
 
 html {
   background-color: rgb(127, 255, 212, 0.2);
+  height: 100vh;
 }
 
 body {
   display: flex;
   justify-content: space-around;
   font-family: Roboto;
-  overflow-x: hidden;
+  height: 100%;
 }
 
 .wrapper {
@@ -128,7 +129,6 @@ input:focus {
   padding: 8px 10px;
   font-size: 1em;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .autocomplete-item:hover,
@@ -180,6 +180,7 @@ input:focus {
   opacity: 0.5;
 }
 
+.copy:hover,
 .submit:enabled:hover,
 .confirm:enabled:hover {
   box-shadow: 0 1px 5px rgba(10, 70, 10, 0.6);

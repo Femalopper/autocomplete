@@ -33,29 +33,44 @@ function Form() {
     }
     setFocusedOption(0);
     setCoords(0);
+    fieldRefs.current[activeField - 1].current.blur();
+  };
+
+  const sortOptions = (givenInputs) => {
+    const autocompleteOptions = options.sort((a, b) => a.localeCompare(b));
+    const sortedOptions = Object.entries(givenInputs).map(([key, value]) => [
+      key,
+      { ...value, autocompleteOptions },
+    ]);
+    return Object.fromEntries(sortedOptions);
   };
 
   const submitForm = () => {
-    setInputs(fields);
+    setInputs(sortOptions(fields));
     setFormState('submitted');
     setSubmitBtnDisable(true);
     setActiveField('1');
     setConfirmBtnDisable(true);
+    fieldRefs.current[0].current.focus();
   };
 
   useLayoutEffect(() => {
-    const autocompleteOptions = options.sort((a, b) => a.localeCompare(b));
-
-    const sortedOptions = Object.entries(inputs).map(([key, value]) => [
-      key,
-      { ...value, autocompleteOptions },
-    ]);
-    setInputs(Object.fromEntries(sortedOptions));
+    setInputs(sortOptions(inputs));
   }, []);
 
   useEffect(() => {
-    console.log(formState);
-    if (coords !== 0) {
+    fieldRefs.current[0].current.focus();
+    const disableClick = (e) => {
+      const field = 'autocomplete-input';
+      if (field !== e.target.classList[0] || !e.target.classList[0]) {
+        e.preventDefault();
+      }
+    };
+    document.body.addEventListener('mousedown', disableClick);
+  }, []);
+
+  useEffect(() => {
+    if (inputs[activeField].status === 'filling') {
       const list = document.querySelector('.autocomplete-list');
       list.scrollTo(0, coords);
     }
@@ -86,7 +101,10 @@ function Form() {
     const nearstUnfilledField = getNearestUnfilledField();
     setFocusedOption(0);
     setCoords(0);
-    setActiveField(nearstUnfilledField);
+    if (nearstUnfilledField) {
+      fieldRefs.current[nearstUnfilledField - 1].current.focus();
+      setActiveField(nearstUnfilledField);
+    }
 
     let status;
 
@@ -128,6 +146,7 @@ function Form() {
         return;
       }
       setFormState('copied');
+      fieldRefs.current[activeField - 1].current.focus();
     }, 500);
   };
 
@@ -185,6 +204,7 @@ function Form() {
           confirmButtonColor: 'rgba(127, 255, 212, 0.6)',
           didClose: () => {
             setActiveField(wrongWordsId[0]);
+            fieldRefs.current[wrongWordsId[0] - 1].current.focus();
             setInputs({
               ...correctWordsObj,
               ...wrongWordsObj,
@@ -211,7 +231,7 @@ function Form() {
     const classname = classList.value.split(' ')[0];
 
     if (!_.has(classes, classname)) {
-      return unfocusAllItems();
+      return;
     }
 
     return classes[classname]();
