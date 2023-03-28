@@ -236,6 +236,7 @@ const Field = forwardRef((props, ref) => {
             type="text"
             id={id}
             autoComplete="off"
+            tabIndex={id}
             name={id}
             className={classNames('autocomplete-input', {
               filled: status === 'filled',
