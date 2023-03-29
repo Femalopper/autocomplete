@@ -15,6 +15,7 @@ function Form() {
   const copyBtnRef = useRef();
   const submitBtnRef = useRef();
   const confirmBtnRef = useRef();
+  const fakeFocusRef = useRef();
   const [inputs, setInputs] = useState(fields);
   const [formState, setFormState] = useState('');
   const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
@@ -35,6 +36,7 @@ function Form() {
     setFocusedOption(0);
     setCoords(0);
     fieldRefs.current[activeField - 1].current.blur();
+    fakeFocusRef.current.focus();
   };
 
   const sortOptions = (givenInputs) => {
@@ -73,7 +75,11 @@ function Form() {
   }, []);
 
   useEffect(() => {
-    if (inputs[activeField].status === 'filling') {
+    if (
+      inputs[activeField].status === 'filling' &&
+      formState !== 'disable' &&
+      formState !== 'disable unconfirmed'
+    ) {
       const list = document.querySelector('.autocomplete-list');
       list.scrollTo(0, coords);
     }
@@ -292,6 +298,7 @@ function Form() {
                 <tr className="row">
                   <td>
                     <button
+                      tabIndex={`${fieldRefs.current.length}`}
                       id="copy__button"
                       type="button"
                       className={classNames('confirm', { btn_out: formState === 'confirmed' })}
@@ -305,12 +312,20 @@ function Form() {
               ) : (
                 <tr className="row">
                   <td>
-                    <button type="button" id="copy__button" className="copy" ref={copyBtnRef}>
+                    <button
+                      tabIndex={`${fieldRefs.current.length}`}
+                      type="button"
+                      id="copy__button"
+                      className="copy"
+                      ref={copyBtnRef}
+                      onFocus={() => setFormState('disable')}
+                    >
                       Copy
                     </button>
                   </td>
                   <td id="buttn">
                     <button
+                      tabIndex={`${fieldRefs.current.length + 1}`}
                       type="submit"
                       id="submit__button"
                       className="submit"
@@ -325,6 +340,9 @@ function Form() {
             </tbody>
           </table>
         </form>
+        <button type="button" ref={fakeFocusRef} className="fake__focus">
+          F
+        </button>
       </main>
     </div>
   );

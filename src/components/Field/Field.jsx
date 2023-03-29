@@ -56,14 +56,17 @@ const Field = forwardRef((props, ref) => {
       }
     } else if (keyCode === 27) {
       // escape
+      console.log(document.activeElement);
       event.preventDefault();
       unfocusAllItems();
+      console.log(document.activeElement);
     } else if (keyCode === 13 && hasOptions) {
       // enter
       const currentOptionValue = optionRefs.current[focusedOption].current.textContent;
       selectItem(currentOptionValue, name);
       event.preventDefault();
     }
+    console.log(document.activeElement);
   };
 
   const pasteHandler = (event) => {
@@ -204,6 +207,7 @@ const Field = forwardRef((props, ref) => {
   };
 
   const focusHandler = (id) => () => {
+    console.log('focus');
     if (id !== activeField) {
       setCoords(0);
       setFocusedOption(0);
