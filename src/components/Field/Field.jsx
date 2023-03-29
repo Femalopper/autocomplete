@@ -31,42 +31,49 @@ const Field = forwardRef((props, ref) => {
     const { name } = target;
 
     const hasOptions = optionRefs.current.length !== 0 && optionRefs.current[0].current;
-
-    if (keyCode === 38 && hasOptions) {
+    const keyCodes = [38, 40, 13];
+    const keyCodeBehavior = {
       // arrow up
-      event.preventDefault();
-      const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
-      if (focusedOption === 0) {
-        setFocusedOption(optionRefs.current.length - 1);
-        setCoords(optionHeight * (optionRefs.current.length - 1));
-      } else {
-        setFocusedOption(focusedOption - 1);
-        setCoords(coords - optionHeight);
-      }
-    } else if (keyCode === 40 && hasOptions) {
+      38: () => {
+        event.preventDefault();
+        const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
+        if (focusedOption === 0) {
+          setFocusedOption(optionRefs.current.length - 1);
+          setCoords(optionHeight * (optionRefs.current.length - 1));
+        } else {
+          setFocusedOption(focusedOption - 1);
+          setCoords(coords - optionHeight);
+        }
+      },
       // arrow down
-      event.preventDefault();
-      const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
-      if (focusedOption === optionRefs.current.length - 1) {
-        setFocusedOption(0);
-        setCoords(0);
-      } else {
-        setFocusedOption(focusedOption + 1);
-        setCoords(coords + optionHeight);
-      }
-    } else if (keyCode === 27) {
+      40: () => {
+        event.preventDefault();
+        const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
+        if (focusedOption === optionRefs.current.length - 1) {
+          setFocusedOption(0);
+          setCoords(0);
+        } else {
+          setFocusedOption(focusedOption + 1);
+          setCoords(coords + optionHeight);
+        }
+      },
+      // enter
+      13: () => {
+        const currentOptionValue = optionRefs.current[focusedOption].current.textContent;
+        selectItem(currentOptionValue, name);
+        event.preventDefault();
+      },
+    };
+
+    if (keyCodes.includes(keyCode) && hasOptions) {
+      keyCodeBehavior[keyCode]();
+    }
+
+    if (keyCode === 27) {
       // escape
-      console.log(document.activeElement);
       event.preventDefault();
       unfocusAllItems();
-      console.log(document.activeElement);
-    } else if (keyCode === 13 && hasOptions) {
-      // enter
-      const currentOptionValue = optionRefs.current[focusedOption].current.textContent;
-      selectItem(currentOptionValue, name);
-      event.preventDefault();
     }
-    console.log(document.activeElement);
   };
 
   const pasteHandler = (event) => {
@@ -86,11 +93,7 @@ const Field = forwardRef((props, ref) => {
 
         const filteredWords = filterWords(copiedValue, options);
         const changeStatus = () => {
-          if (
-            formState === 'unconfirmed' &&
-            _.has(wrongWords, currentName) &&
-            wrongWords[currentName] === copiedValue
-          ) {
+          if (_.has(wrongWords, currentName) && wrongWords[currentName] === copiedValue) {
             return 'unconfirmed word';
           }
           if (formState === 'unconfirmed' && filteredWords.includes(copiedValue)) {
@@ -149,26 +152,24 @@ const Field = forwardRef((props, ref) => {
     const filteredHintsList = filterWords(value, options);
     const nearstUnfilledField = getNearestUnfilledField();
 
+    const focusNearestUnfilled = () => {
+      if (nearstUnfilledField) {
+        fieldRefs.current[nearstUnfilledField - 1].current.focus();
+        setActiveField(nearstUnfilledField);
+      }
+    };
+
     let status;
 
     if (_.has(wrongWords, name) && wrongWords[name] === value) {
       status = 'unconfirmed word';
-      if (nearstUnfilledField) {
-        fieldRefs.current[nearstUnfilledField - 1].current.focus();
-        setActiveField(nearstUnfilledField);
-      }
+      focusNearestUnfilled();
     } else if (formState === 'unconfirmed' && filteredHintsList.includes(value)) {
       status = 'unconfirmed filled';
-      if (nearstUnfilledField) {
-        fieldRefs.current[nearstUnfilledField - 1].current.focus();
-        setActiveField(nearstUnfilledField);
-      }
-    } else if (formState !== 'unconfirmed' && filteredHintsList.includes(value)) {
+      focusNearestUnfilled();
+    } else if (filteredHintsList.includes(value)) {
       status = 'filled';
-      if (nearstUnfilledField) {
-        fieldRefs.current[nearstUnfilledField - 1].current.focus();
-        setActiveField(nearstUnfilledField);
-      }
+      focusNearestUnfilled();
     } else if (filteredHintsList.length !== 0) {
       status = 'filling';
     } else {
@@ -207,7 +208,6 @@ const Field = forwardRef((props, ref) => {
   };
 
   const focusHandler = (id) => () => {
-    console.log('focus');
     if (id !== activeField) {
       setCoords(0);
       setFocusedOption(0);

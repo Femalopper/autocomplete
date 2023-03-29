@@ -27,7 +27,6 @@ function Form() {
   const [wrongWords, setWrongWords] = useState({});
 
   const unfocusAllItems = () => {
-    console.log(fieldRefs.current[activeField - 1].current);
     if (formState === 'unconfirmed') {
       setFormState('disable unconfirmed');
     } else {
@@ -62,10 +61,8 @@ function Form() {
   }, []);
 
   useEffect(() => {
-    console.log('f');
     fieldRefs.current[0].current.focus();
     const disableClick = (e) => {
-      console.log('d');
       const field = 'autocomplete-input';
       if (field !== e.target.classList[0] || !e.target.classList[0]) {
         e.preventDefault();
