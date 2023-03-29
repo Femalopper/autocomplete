@@ -92,16 +92,17 @@ const Field = forwardRef((props, ref) => {
         );
 
         const filteredWords = filterWords(copiedValue, options);
+
         const changeStatus = () => {
+          let status;
           if (_.has(wrongWords, currentName) && wrongWords[currentName] === copiedValue) {
-            return 'unconfirmed word';
-          }
-          if (formState === 'unconfirmed' && filteredWords.includes(copiedValue)) {
-            return 'unconfirmed filled';
-          }
-          if (filteredWords.includes(copiedValue)) return 'filled';
-          if (filteredWords.length !== 0) return 'filling';
-          return 'focused';
+            status = 'unconfirmed word';
+          } else if (formState === 'unconfirmed' && filteredWords.includes(copiedValue)) {
+            status = 'unconfirmed filled';
+          } else if (filteredWords.includes(copiedValue)) status = 'filled';
+          else if (filteredWords.length !== 0) status = 'filling';
+          else status = 'focused';
+          return status;
         };
 
         return {
