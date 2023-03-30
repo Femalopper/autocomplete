@@ -8,6 +8,7 @@ import filterWords from './autocomplete';
 
 const Field = forwardRef((props, ref) => {
   const optionRefs = useRef([]);
+  const fakeFocusRef = useRef([]);
   const fieldRefs = ref;
   const {
     selectItem,
@@ -24,6 +25,8 @@ const Field = forwardRef((props, ref) => {
     coords,
     setCoords,
     wrongWords,
+    confirmBtnDisable,
+    submitFormData,
   } = props;
 
   const keyDownHandler = (event) => {
@@ -73,6 +76,16 @@ const Field = forwardRef((props, ref) => {
       // escape
       event.preventDefault();
       unfocusAllItems();
+      fakeFocusRef.current.focus();
+    }
+    if (
+      keyCode === 9 &&
+      +activeField === fieldRefs.current.length &&
+      confirmBtnDisable &&
+      submitFormData !== ''
+    ) {
+      unfocusAllItems();
+      fakeFocusRef.current.focus();
     }
   };
 
@@ -209,6 +222,9 @@ const Field = forwardRef((props, ref) => {
   };
 
   const focusHandler = (id) => () => {
+    console.log(formState);
+    console.log(inputs[id].status);
+    console.log(id);
     if (id !== activeField) {
       setCoords(0);
       setFocusedOption(0);
@@ -263,6 +279,11 @@ const Field = forwardRef((props, ref) => {
           formState !== 'disable unconfirmed'
             ? showOptions(autocompleteOptions, id)
             : null}
+          {+id === fieldRefs.current.length ? (
+            <button type="button" ref={fakeFocusRef} className="fake__focus">
+              F
+            </button>
+          ) : null}
         </div>
       </div>
     </td>

@@ -14,6 +14,7 @@ body {
   justify-content: space-around;
   font-family: Roboto;
   height: 100%;
+  overflow-y: auto;
 }
 
 .wrapper {
@@ -72,6 +73,7 @@ td {
   border-radius: 6px;
   border: 2px solid #b0e086;
   box-shadow: 0 1px 5px rgba(10, 70, 10, 0.2);
+  z-index: 999;
 }
 
 .number {
@@ -158,7 +160,8 @@ input:focus {
   border-radius: 6px;
   cursor: pointer;
   font-size: 1.1em;
-  color: rgb(26, 108, 102);
+  color: transparent;
+  text-shadow: 0 0 0 rgb(26, 108, 102);
   font-family: Helvetica;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -179,13 +182,17 @@ input:focus {
 }
 
 .fake__focus {
+  width: 0;
   opacity: 0;
   overflow: hidden;
+  position: fixed;
 }
 
 .submit:disabled,
 .confirm:disabled {
   opacity: 0.5;
+  color: transparent;
+  text-shadow: 0 0 0 rgb(26, 108, 102);
 }
 
 .copy:hover,
@@ -394,4 +401,9 @@ input:focus {
   .animate-ul li {
     font-size: 2em;
   }
+}
+
+.swal2-styled.swal2-confirm {
+  color: transparent !important;
+  text-shadow: 0 0 0 white !important;
 }

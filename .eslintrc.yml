@@ -24,4 +24,6 @@ rules: { 'react/react-in-jsx-scope': 'off', 'object-curly-newline': 'off', 'comm
 ],
 'no-shadow': 'off',
  'implicit-arrow-linebreak': 0,
+ 'indent': 'off',
+ 'no-param-reassign': 0
 }

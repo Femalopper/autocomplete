@@ -15,7 +15,6 @@ function Form() {
   const copyBtnRef = useRef();
   const submitBtnRef = useRef();
   const confirmBtnRef = useRef();
-  const fakeFocusRef = useRef();
   const [inputs, setInputs] = useState(fields);
   const [formState, setFormState] = useState('');
   const [submitBtnDisable, setSubmitBtnDisable] = useState(true);
@@ -35,7 +34,6 @@ function Form() {
     setFocusedOption(0);
     setCoords(0);
     fieldRefs.current[activeField - 1].current.blur();
-    fakeFocusRef.current.focus();
   };
 
   const sortOptions = (givenInputs) => {
@@ -207,7 +205,7 @@ function Form() {
           icon: 'error',
           title: 'Oops...',
           text: 'Mistake! Try again!',
-          confirmButtonColor: 'rgba(127, 255, 212, 0.6)',
+          confirmButtonColor: 'rgba(127, 255, 212, 0.7)',
           didClose: () => {
             setActiveField(wrongWordsId[0]);
             fieldRefs.current[wrongWordsId[0] - 1].current.focus();
@@ -289,6 +287,8 @@ function Form() {
                   submitData={submitFormData}
                   wrongWords={wrongWords}
                   setWrongWords={setWrongWords}
+                  confirmBtnDisable={confirmBtnDisable}
+                  submitFormData={submitFormData}
                 />
               </tr>
               {submitFormData !== '' ? (
@@ -337,9 +337,6 @@ function Form() {
             </tbody>
           </table>
         </form>
-        <button type="button" ref={fakeFocusRef} className="fake__focus">
-          F
-        </button>
       </main>
     </div>
   );

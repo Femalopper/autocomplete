@@ -4,7 +4,7 @@ const filterWords = (value, options) => {
   const inputLetters = value.toLowerCase();
 
   // filter the list of hints according to the pressed key
-  const filterOptions = () => {
+  const findRandomFirstSimilarSbstrIndex = () => {
     let low = 0;
     let high = options.length - 1;
 
@@ -22,11 +22,9 @@ const filterWords = (value, options) => {
     }
   };
 
-  const midWord = filterOptions();
+  const randomFirstSimilarSbstrIndex = findRandomFirstSimilarSbstrIndex();
 
-  const filterLeftRightOptions = (l, h, feature) => {
-    let low = l;
-    let high = h;
+  const findSimilarSbstrIndex = (low, high, feature) => {
     while (low <= high) {
       const midWordIndex = Math.floor((low + high) / 2);
       const midWordSubstring = options[midWordIndex].slice(0, inputLetters.length).toLowerCase();
@@ -54,36 +52,39 @@ const filterWords = (value, options) => {
     }
   };
 
-  const filterLeftOptions = () => {
+  const findSimilarSbstrLeftIndex = () => {
     const low = 0;
-    const high = midWord;
+    const high = randomFirstSimilarSbstrIndex;
 
-    if (midWord === 0 || !midWord) {
-      return midWord;
+    if (randomFirstSimilarSbstrIndex === 0 || !randomFirstSimilarSbstrIndex) {
+      return randomFirstSimilarSbstrIndex;
     }
 
-    const previousSubstring = options[midWord - 1].slice(0, inputLetters.length).toLowerCase();
+    const previousSubstring = options[randomFirstSimilarSbstrIndex - 1]
+      .slice(0, inputLetters.length)
+      .toLowerCase();
 
-    if (previousSubstring !== inputLetters) return midWord;
-    return filterLeftRightOptions(low, high, 'left');
+    if (previousSubstring !== inputLetters) return randomFirstSimilarSbstrIndex;
+    return findSimilarSbstrIndex(low, high, 'left');
   };
 
-  const filterRightOptions = () => {
-    const low = midWord;
+  const findSimilarSbstrRightIndex = () => {
+    const low = randomFirstSimilarSbstrIndex;
     const high = options.length - 1;
 
-    if (midWord >= options.length - 1 || !midWord) {
-      return midWord;
+    if (randomFirstSimilarSbstrIndex >= options.length - 1 || !randomFirstSimilarSbstrIndex) {
+      return randomFirstSimilarSbstrIndex;
     }
 
-    const nextSubstring = options[midWord + 1].slice(0, inputLetters.length).toLowerCase();
-    if (nextSubstring !== inputLetters) return midWord;
+    const nextSubstring = options[randomFirstSimilarSbstrIndex + 1]
+      .slice(0, inputLetters.length)
+      .toLowerCase();
+    if (nextSubstring !== inputLetters) return randomFirstSimilarSbstrIndex;
 
-    return filterLeftRightOptions(low, high, 'right');
+    return findSimilarSbstrIndex(low, high, 'right');
   };
 
-  const filteredHintsList = options.slice(filterLeftOptions(), filterRightOptions() + 1);
-  return filteredHintsList;
+  return options.slice(findSimilarSbstrLeftIndex(), findSimilarSbstrRightIndex() + 1);
 };
 
 export default filterWords;
