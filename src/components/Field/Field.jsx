@@ -30,14 +30,14 @@ const Field = forwardRef((props, ref) => {
   } = props;
 
   const keyDownHandler = (event) => {
-    const { target, keyCode } = event;
+    const { target, code } = event;
     const { name } = target;
 
     const hasOptions = optionRefs.current.length !== 0 && optionRefs.current[0].current;
-    const keyCodes = [38, 40, 13];
+    const keyCodes = ['ArrowUp', 'ArrowDown', 'Enter'];
     const keyCodeBehavior = {
       // arrow up
-      38: () => {
+      ArrowUp: () => {
         event.preventDefault();
         const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
         if (focusedOption === 0) {
@@ -49,7 +49,7 @@ const Field = forwardRef((props, ref) => {
         }
       },
       // arrow down
-      40: () => {
+      ArrowDown: () => {
         event.preventDefault();
         const optionHeight = optionRefs.current[0].current.getBoundingClientRect().height;
         if (focusedOption === optionRefs.current.length - 1) {
@@ -61,25 +61,25 @@ const Field = forwardRef((props, ref) => {
         }
       },
       // enter
-      13: () => {
+      Enter: () => {
         const currentOptionValue = optionRefs.current[focusedOption].current.textContent;
         selectItem(currentOptionValue, name);
         event.preventDefault();
       },
     };
 
-    if (keyCodes.includes(keyCode) && hasOptions) {
-      keyCodeBehavior[keyCode]();
+    if (keyCodes.includes(code) && hasOptions) {
+      keyCodeBehavior[code]();
     }
 
-    if (keyCode === 27) {
+    if (code === 'Escape') {
       // escape
       event.preventDefault();
       unfocusAllItems();
       fakeFocusRef.current.focus();
     }
     if (
-      keyCode === 9 &&
+      code === 'Tab' &&
       +activeField === fieldRefs.current.length &&
       confirmBtnDisable &&
       submitFormData !== ''
@@ -222,9 +222,6 @@ const Field = forwardRef((props, ref) => {
   };
 
   const focusHandler = (id) => () => {
-    console.log(formState);
-    console.log(inputs[id].status);
-    console.log(id);
     if (id !== activeField) {
       setCoords(0);
       setFocusedOption(0);
